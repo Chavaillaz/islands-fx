@@ -189,11 +189,16 @@ A change is ready once that passes, which takes:
   then those of `java`, `javax` and `jakarta`, then those of third parties, then those of `com.chavaillaz`,
   each group sorted alphabetically and separated from the next by a blank line, with no star import and none
   left unused.
-- **No compiler warning.** Every check of the compiler is on (`-Xlint:all`), and a warning fails the build.
+- **No compiler warning.** Every check of the compiler is on (`-Xlint:all`), and a warning fails the build,
+  on JDK 25 as on any later one, whose compiler adds checks of its own.
+- **Dependency versions converging.** Two dependencies asking for different versions of a third one, the test
+  ones included, fail the build, rather than Maven taking whichever it reaches first: the version is then managed
+  in the POM, the newest one asked for unless something rules it out.
 
-Every pull request, and every push to `master`, is built that way on Java 25, with the coverage of the tests measured,
-and failing once they cover less than 80% of the lines or of the branches of the library: `mvn clean -Pcoverage verify`
-writes the same report to `target/site/jacoco`, the `clean` keeping the data of an earlier build out of it.
+Every pull request, and every push to `master`, is built that way on Java 25 and on every later long-term
+support version, with the coverage of the tests measured, and failing once they cover less than 80% of the lines
+or of the branches of the library: `mvn clean -Pcoverage verify` writes the same report to `target/site/jacoco`,
+the `clean` keeping the data of an earlier build out of it.
 
 ### Releasing
 
