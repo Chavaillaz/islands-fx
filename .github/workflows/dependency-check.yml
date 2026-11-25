@@ -5,6 +5,8 @@ on:
       - master
   pull_request:
     types: [ opened, synchronize, reopened ]
+  # Started on master by the dependency update once it merged an update, whose push starts no workflow by itself
+  workflow_dispatch:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   # A superseded run is dropped everywhere but on master, whose every push keeps its own status and badge
@@ -27,8 +29,9 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Run Snyk to monitor for vulnerabilities
-        # The snapshot Snyk watches is the state of the project, which a pull request is not yet
-        if: github.event_name == 'push' && env.SNYK_TOKEN != ''
+        # The snapshot Snyk watches is the state of master, after a push or an update merged, which a pull request
+        # is not yet
+        if: github.ref == 'refs/heads/master' && env.SNYK_TOKEN != ''
         uses: snyk/actions/maven@v1
         continue-on-error: true
         with:

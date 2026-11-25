@@ -13,8 +13,9 @@ permissions:
   # What the merge of the pull request and the deletion of its branch write
   contents: write
   pull-requests: write
-  # What the reading of the other builds of the same commit needs
-  actions: read
+  # What the reading of the other builds of the same commit needs, and the start of the builds of master once the
+  # update is merged
+  actions: write
 jobs:
   merge:
     # Only the branches Dependabot pushes, and only the builds of their pull request: those builds are given a
@@ -68,3 +69,13 @@ jobs:
           fi
 
           gh pr merge "$number" --repo "$GITHUB_REPOSITORY" --squash --delete-branch
+
+          # A merge made with the token of this workflow starts no workflow on master, unlike a push of anyone else:
+          # GitHub only lets that token start one through a dispatch. The builds of a push are started that way, and
+          # the snapshot published after an update of the Maven dependencies, the builds of the pull request having
+          # passed on what was just merged
+          gh workflow run code-quality.yml --repo "$GITHUB_REPOSITORY" --ref master
+          gh workflow run dependency-check.yml --repo "$GITHUB_REPOSITORY" --ref master
+          case "$BRANCH" in
+            dependabot/maven/*) gh workflow run maven-publish.yml --repo "$GITHUB_REPOSITORY" --ref master ;;
+          esac

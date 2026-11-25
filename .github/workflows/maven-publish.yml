@@ -8,8 +8,8 @@ on:
     workflows: [ Code quality ]
     types: [ completed ]
     branches: [ master ]
-  # Publishes the snapshot of the branch it is run on to GitHub Packages, for an application to try a change before
-  # it is merged
+  # Publishes the snapshot of the branch it is run on to GitHub Packages: master, once the dependency update merged an
+  # update of the Maven dependencies, or a branch, for an application to try a change before it is merged
   workflow_dispatch:
 # Snapshots are published one at a time, as each is numbered after the builds published before it. A release
 # publishes in a group of its own, so that a snapshot queued after it does not cancel it while it waits

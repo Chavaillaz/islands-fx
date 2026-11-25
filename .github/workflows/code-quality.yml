@@ -5,6 +5,8 @@ on:
       - master
   pull_request:
     types: [ opened, synchronize, reopened ]
+  # Started on master by the dependency update once it merged an update, whose push starts no workflow by itself
+  workflow_dispatch:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   # A superseded run is dropped everywhere but on master, whose every push keeps its own status and badge
