@@ -1,0 +1,56 @@
+/*
+ * The dark theme: the colors base.css styles the controls with.
+ * Every theme defines the same colors, under the same names.
+ */
+.root {
+    /* Surfaces: the window behind the islands, the islands, and what pops up over them */
+    -main-window-bg: #26282C;
+    -island-bg: #191A1C;
+    -island-border: #26282C;
+    -control-border: #40434A;
+    -popup-bg: #26282C;
+    -popup-border: #33353B;
+    -tooltip-bg: #33353B;
+    -tooltip-border: #33353B;
+
+    /* Text */
+    -text-default: #D1D3D9;
+    -text-muted: #9FA2A8;
+    -text-secondary: #73767C;
+    -text-disabled: #4C4F56;
+    -text-link: #71A1FE;
+    -text-error: #F57E84;
+    -text-over-accent: #FFFFFF;
+
+    /* Accent, selection, toolbars and tabs */
+    -accent: #3871E1;
+    -selection-active: #2A4371;
+    -selection-inactive: #33353B;
+    -selection-hovered: #FFFFFF10;
+    -toolbar-hovered: #FFFFFF17;
+    -toolbar-border: #FFFFFF21;
+    -toolbar-pressed: #FFFFFF29;
+    -tab-selected-bg: #233558;
+    -tab-selected-border: #2E4D89;
+    -scrollbar-thumb: #FFFFFF26;
+    -scrollbar-thumb-hovered: #FFFFFF4D;
+
+    /* Icons */
+    -icon-default: #C3C5CB;
+    -icon-muted: #9FA2A8;
+    -icon-blue: #548AF7;
+    -icon-orange: #E08855;
+    -icon-purple: #A571E6;
+
+    /* Badges, after the feedback colors */
+    -badge-neutral-text: #9FA2A8;
+    -badge-neutral-bg: #33353B;
+    -badge-info-text: #71A1FE;
+    -badge-info-bg: #233558;
+    -badge-success-text: #6DB083;
+    -badge-success-bg: #203B2A;
+    -badge-warning-text: #D59637;
+    -badge-warning-bg: #44321D;
+    -badge-danger-text: #F57E84;
+    -badge-danger-bg: #56272B;
+}

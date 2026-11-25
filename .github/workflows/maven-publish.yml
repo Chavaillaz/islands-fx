@@ -1,0 +1,59 @@
+name: Publish
+on:
+  # A release publishes the version of its tag
+  release:
+    types: [ created ]
+  # A push to master publishes its snapshot once the code quality checks pass on it
+  workflow_run:
+    workflows: [ Code quality ]
+    types: [ completed ]
+    branches: [ master ]
+  # Publishes the snapshot of the branch it is run on, for an application to try a change before it is merged
+  workflow_dispatch:
+# Snapshots are published one at a time, as each is numbered after the builds published before it. A release
+# publishes in a group of its own, so that a snapshot queued after it does not cancel it while it waits
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'release' && github.ref || 'snapshot' }}
+  cancel-in-progress: false
+jobs:
+  github-packages:
+    name: GitHub Packages
+    # The checks also run on pull requests, which publish nothing, even from a branch named master
+    if: >-
+      github.event_name != 'workflow_run'
+      || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # What the upload to the packages of this repository writes, with the token of the workflow: no personal
+      # access token is needed to publish
+      packages: write
+    steps:
+      - id: checkout-repository
+        name: Checkout
+        uses: actions/checkout@v7
+        with:
+          # The commit the checks passed on, rather than the latest of master, which they may not have checked yet
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - id: setup-environment
+        name: Set up for publishing to GitHub Packages
+        uses: actions/setup-java@v6
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          # The server deployed to below, which the settings written by this step authenticate with the actor of
+          # the workflow and the token given to the publishing step
+          server-id: github
+          server-username: GITHUB_ACTOR
+          server-password: GITHUB_TOKEN
+
+      - id: publish-github-packages
+        name: Publish to GitHub Packages
+        # The release profile adds the sources and javadoc archives, the tests running in the code quality checks
+        # instead. The packages of a repository are found under the name of its owner in lowercase
+        run: >-
+          mvn --batch-mode deploy -Prelease -DskipTests
+          -DaltDeploymentRepository=github::https://maven.pkg.github.com/${GITHUB_REPOSITORY,,}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

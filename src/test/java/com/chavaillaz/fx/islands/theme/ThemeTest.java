@@ -1,0 +1,62 @@
+package com.chavaillaz.fx.islands.theme;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javafx.css.CssParser;
+import javafx.css.Stylesheet;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
+
+@DisplayName("Theme")
+class ThemeTest {
+
+    /** A color named in a stylesheet, which is neither a property of JavaFX nor a negative number. */
+    private static final Pattern COLOR_USED = Pattern.compile("(?<![\\w-])-(?!fx-)[a-z][a-z0-9-]*");
+    private static final Pattern COLOR_DEFINED = Pattern.compile("^\\s+(-[a-z][a-z0-9-]*):", Pattern.MULTILINE);
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("stylesheets")
+    @DisplayName("Parses its stylesheets without error")
+    void parsesWithoutError(String url) throws IOException {
+        CssParser.errorsProperty().clear();
+        Stylesheet stylesheet = new CssParser().parse(URI.create(url).toURL());
+
+        assertThat(stylesheet.getRules()).isNotEmpty();
+        assertThat(CssParser.errorsProperty()).isEmpty();
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @EnumSource(Theme.class)
+    @DisplayName("Defines every color the base stylesheet names, and no other one")
+    void definesEveryColorNamed(Theme theme) throws IOException {
+        Set<String> used = COLOR_USED.matcher(read(Theme.BASE_STYLESHEET)).results()
+                .map(match -> match.group())
+                .collect(Collectors.toSet());
+        Set<String> defined = COLOR_DEFINED.matcher(read(theme.stylesheet())).results()
+                .map(match -> match.group(1))
+                .collect(Collectors.toSet());
+
+        assertThat(defined).isEqualTo(used);
+    }
+
+    static Stream<String> stylesheets() {
+        return Stream.concat(Stream.of(Theme.BASE_STYLESHEET), Stream.of(Theme.values()).map(Theme::stylesheet));
+    }
+
+    private static String read(String url) throws IOException {
+        try (InputStream input = URI.create(url).toURL().openStream()) {
+            return new String(input.readAllBytes(), StandardCharsets.UTF_8);
+        }
+    }
+}
