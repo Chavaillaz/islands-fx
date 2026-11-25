@@ -275,6 +275,12 @@
                     <rulesUri>file:///${project.basedir}/versions.xml</rulesUri>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.8.0</version>
+            </plugin>
         </plugins>
     </build>
 
