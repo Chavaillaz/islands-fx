@@ -2,6 +2,7 @@
 
 ![Quality Gate](https://github.com/chavaillaz/islands-fx/actions/workflows/code-quality.yml/badge.svg)
 ![Dependency Check](https://github.com/chavaillaz/islands-fx/actions/workflows/dependency-check.yml/badge.svg)
+[![Maven Central](https://maven-badges.sml.io/sonatype-central/com.chavaillaz/islands-fx/badge.svg?subject=Maven%20Central&color=blue)](https://maven-badges.sml.io/sonatype-central/com.chavaillaz/islands-fx)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Light and dark themes for JavaFX applications, and the workbench of their main window: its toolbar standing in the
@@ -27,56 +28,53 @@ these parts.
 
 ## Installation
 
-The library is published to [GitHub Packages](https://github.com/chavaillaz/islands-fx/packages), which asks for a
-token to download from, even for a public package: a personal access token (classic) of your GitHub account with the
-`read:packages` scope, which goes in the settings of Maven (`~/.m2/settings.xml`):
+The dependency is available in Maven Central, along with JavaFX, which the application provides:
 
 ```xml
-<settings>
-    <servers>
-        <server>
-            <id>github-islands-fx</id>
-            <username>YOUR_GITHUB_USERNAME</username>
-            <password>YOUR_TOKEN</password>
-        </server>
-    </servers>
-</settings>
+<dependency>
+    <groupId>com.chavaillaz</groupId>
+    <artifactId>islands-fx</artifactId>
+    <version>1.0.0</version>
+</dependency>
+<dependency>
+    <groupId>org.openjfx</groupId>
+    <artifactId>javafx-controls</artifactId>
+    <version>27.0.1.1</version>
+</dependency>
 ```
 
-The application then declares the repository, under the identifier of that server, and the dependency, along with
-JavaFX:
-
-```xml
-<repositories>
-    <repository>
-        <id>github-islands-fx</id>
-        <url>https://maven.pkg.github.com/chavaillaz/islands-fx</url>
-    </repository>
-</repositories>
-
-<dependencies>
-    <dependency>
-        <groupId>com.chavaillaz</groupId>
-        <artifactId>islands-fx</artifactId>
-        <version>1.0.0</version>
-    </dependency>
-    <dependency>
-        <groupId>org.openjfx</groupId>
-        <artifactId>javafx-controls</artifactId>
-        <version>27.0.1.1</version>
-    </dependency>
-</dependencies>
-```
-
-Every push to `master` whose checks pass also publishes its snapshot, under the version of its POM ending in
-`-SNAPSHOT`, for an application to try a change before its release. Each publication becomes the build of that version
-Maven downloads, once it looks for a newer one: once a day, or at every build run with `-U`.
-
-A build reaching neither GitHub nor a token can use a copy installed in the local repository of Maven instead, with
-`mvn install` run in a clone of this repository. On the module path, the application reads the module:
+On the module path, the library is the module `com.chavaillaz.fx.islands`, which requires JavaFX and the JSpecify API
+transitively:
 
 ```java
 requires com.chavaillaz.fx.islands;
+```
+
+### Snapshots
+
+Every push to `master` passing the code quality checks publishes its snapshot, under the version of its POM, to
+[GitHub Packages](https://github.com/chavaillaz/islands-fx/packages), for an application to try a change before
+its release. Maven downloads the latest build of that version once it looks for a newer one: once a day, or at
+every build run with `-U`. GitHub asks for a token to download from it, even for a public package: a personal
+access token (classic) with the `read:packages` scope, which goes in the settings of Maven (`~/.m2/settings.xml`)
+under the identifier of the repository the application declares:
+
+```xml
+<repository>
+    <id>github-islands-fx</id>
+    <url>https://maven.pkg.github.com/chavaillaz/islands-fx</url>
+    <releases>
+        <enabled>false</enabled>
+    </releases>
+</repository>
+```
+
+```xml
+<server>
+    <id>github-islands-fx</id>
+    <username>YOUR_GITHUB_USERNAME</username>
+    <password>YOUR_TOKEN</password>
+</server>
 ```
 
 ## Usage
@@ -199,12 +197,14 @@ writes the same report to `target/site/jacoco`, the `clean` keeping the data of 
 
 ### Releasing
 
-A release is made by the maintainer, from a clean working tree: `sh release.sh` asks for the version, sets it in the
-POM and in this README, and pushes that commit as a tag of the same name, `master` keeping its snapshot version.
-Publishing a GitHub release for that tag then starts the [workflow](.github/workflows/maven-publish.yml) building the
-library and publishing it to GitHub Packages, with the token GitHub gives the workflow. The same workflow publishes the
-snapshot of `master` once the code quality checks pass on a push. It can also be run by hand on a branch, which
-publishes the snapshot of that branch, the one applications get until `master` publishes again.
+A release is made by the maintainer, from a clean working tree: `sh release.sh` asks for the version, sets it
+in the POM and in the dependency this page shows, and pushes that commit as a tag of the same name. `master`
+keeps its snapshot version, and takes the README naming the new version in a commit of its own, to push with
+the next ones.
+Publishing a GitHub release for that tag then starts the [workflow](.github/workflows/maven-publish.yml)
+building, signing and publishing the artifacts to Maven Central, and publishing the JAR to GitHub Packages. The
+same workflow publishes the snapshot of `master` to GitHub Packages once the code quality checks pass on a push,
+and can be run by hand on a branch to publish the snapshot of that branch.
 
 ## License
 

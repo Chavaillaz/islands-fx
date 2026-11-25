@@ -1,14 +1,15 @@
 name: Publish
 on:
-  # A release publishes the version of its tag
+  # A release publishes the version of its tag, to Maven Central and to GitHub Packages
   release:
     types: [ created ]
-  # A push to master publishes its snapshot once the code quality checks pass on it
+  # A push to master publishes its snapshot to GitHub Packages once the code quality checks pass on it
   workflow_run:
     workflows: [ Code quality ]
     types: [ completed ]
     branches: [ master ]
-  # Publishes the snapshot of the branch it is run on, for an application to try a change before it is merged
+  # Publishes the snapshot of the branch it is run on to GitHub Packages, for an application to try a change before
+  # it is merged
   workflow_dispatch:
 # Snapshots are published one at a time, as each is numbered after the builds published before it. A release
 # publishes in a group of its own, so that a snapshot queued after it does not cancel it while it waits
@@ -16,6 +17,38 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'release' && github.ref || 'snapshot' }}
   cancel-in-progress: false
 jobs:
+  maven-central:
+    name: Maven Central
+    # Maven Central takes the releases only
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - id: checkout-repository
+        name: Checkout
+        uses: actions/checkout@v7
+
+      - id: setup-environment
+        name: Set up for publishing to Maven Central Repository
+        uses: actions/setup-java@v6
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          server-id: central
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+          gpg-private-key: ${{ secrets.GPG_SIGNING_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+
+      - id: publish-maven-central
+        name: Publish to Maven Central Repository
+        run: mvn --batch-mode deploy -Prelease -DskipTests
+        env:
+          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.MAVEN_SECRET }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
   github-packages:
     name: GitHub Packages
     # The checks also run on pull requests, which publish nothing, even from a branch named master
@@ -50,10 +83,10 @@ jobs:
 
       - id: publish-github-packages
         name: Publish to GitHub Packages
-        # The release profile adds the sources and javadoc archives, the tests running in the code quality checks
-        # instead. The packages of a repository are found under the name of its owner in lowercase
+        # Without the release profile, which signs the artifacts and uploads them to Maven Central: the JAR and the
+        # POM only. The packages of a repository are found under the name of its owner in lowercase
         run: >-
-          mvn --batch-mode deploy -Prelease -DskipTests
+          mvn --batch-mode deploy -DskipTests
           -DaltDeploymentRepository=github::https://maven.pkg.github.com/${GITHUB_REPOSITORY,,}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
