@@ -263,24 +263,29 @@ Lists, trees, tables and tree tables are framed as text fields are, unless they 
 already: the content of the window, or of a tool window. A few style classes, which the nodes of an application take,
 change how the themes style them:
 
-| Style class    | Given to                                      | Makes it                                             |
-|----------------|-----------------------------------------------|------------------------------------------------------|
-| `edge-to-edge` | a list, a tree, a table or a tree table       | unframed, filling an island deeper than its content  |
-| `align-right`  | a column of a table or of a tree table        | aligned on the right, its header included            |
+| Style class                                  | Given to                  | Makes it                                  |
+|----------------------------------------------|---------------------------|-------------------------------------------|
+| `edge-to-edge`                               | a list, a tree or a table | unframed, deep in an island               |
+| `align-right`                                | a column of a table       | aligned on the right, its header included |
+| `text-muted`, `text-secondary`               | a label or a text         | less prominent                            |
+| `text-error`, `text-warning`, `text-success` | a label or a text         | colored after how things stand            |
+| `text-bold`, `text-small`, `text-large`      | a label or a text         | bold, smaller or larger                   |
+| `monospace`                                  | a label or a text         | in a monospaced font                      |
 
 ### Colors
 
 The stylesheets of an application can use the colors of the themes, which every theme defines under the same names:
 
-| Color                                                           | Stands for                                           |
-|-----------------------------------------------------------------|------------------------------------------------------|
-| `-main-window-bg`, `-island-bg`, `-island-border`               | the window behind the islands, an island, its lines  |
-| `-text-default`, `-text-muted`, `-text-secondary`, `-text-link` | text, from the most to the least prominent           |
-| `-text-error`, `-text-disabled`, `-text-over-accent`            | text telling an error, disabled, or over the accent  |
-| `-accent`, `-selection-active`, `-selection-inactive`           | the accent, the selection of a focused list or not   |
-| `-icon-default`, `-icon-muted`, `-icon-blue`, `-icon-orange`    | the strokes of icons                                 |
-| `-badge-success-bg`, `-badge-danger-bg`, and their `-text`      | the tints of badges, such as the rows of a status    |
-| `-control-error-border`, `-control-warning-border`              | the outline of an input failing validation           |
+| Color                                                           | Stands for                                          |
+|-----------------------------------------------------------------|-----------------------------------------------------|
+| `-main-window-bg`, `-island-bg`, `-island-border`               | the window behind the islands, an island, its lines |
+| `-text-default`, `-text-muted`, `-text-secondary`, `-text-link` | text, from the most to the least prominent          |
+| `-text-error`, `-text-warning`, `-text-success`                 | text telling an error, a warning, or a success      |
+| `-text-disabled`, `-text-over-accent`                           | text disabled, or over the accent                   |
+| `-accent`, `-selection-active`, `-selection-inactive`           | the accent, the selection of a focused list or not  |
+| `-icon-default`, `-icon-muted`, `-icon-blue`, `-icon-orange`    | the strokes of icons                                |
+| `-badge-success-bg`, `-badge-danger-bg`, and their `-text`      | the tints of badges, such as the rows of a status   |
+| `-control-error-border`, `-control-warning-border`              | the outline of an input failing validation          |
 
 ```css
 .table-row-cell:invalid {

@@ -22,6 +22,8 @@
     -text-disabled: #4C4F56;
     -text-link: #71A1FE;
     -text-error: #F57E84;
+    -text-success: #6DB083;
+    -text-warning: #D59637;
     -text-over-accent: #FFFFFF;
 
     /* Accent, selection, toolbars and tabs */

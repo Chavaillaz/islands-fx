@@ -1382,6 +1382,50 @@
     -fx-text-fill: -text-link;
 }
 
+/* ------------------------------------------------------------------------------------------- Text classes */
+
+/* The style classes of the labels and texts of an application, colored or sized as the texts of the themes */
+.text-muted {
+    -fx-text-fill: -text-muted;
+    -fx-fill: -text-muted;
+}
+
+.text-secondary {
+    -fx-text-fill: -text-secondary;
+    -fx-fill: -text-secondary;
+}
+
+.text-error {
+    -fx-text-fill: -text-error;
+    -fx-fill: -text-error;
+}
+
+.text-warning {
+    -fx-text-fill: -text-warning;
+    -fx-fill: -text-warning;
+}
+
+.text-success {
+    -fx-text-fill: -text-success;
+    -fx-fill: -text-success;
+}
+
+.text-bold {
+    -fx-font-weight: bold;
+}
+
+.text-small {
+    -fx-font-size: 11px;
+}
+
+.text-large {
+    -fx-font-size: 15px;
+}
+
+.monospace {
+    -fx-font-family: monospace;
+}
+
 /* ------------------------------------------------------------------------------------------------- Icons */
 
 .icon-shape {

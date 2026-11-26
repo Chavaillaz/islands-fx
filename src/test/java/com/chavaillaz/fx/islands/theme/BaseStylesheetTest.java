@@ -20,6 +20,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Pagination;
 import javafx.scene.control.TableColumn;
@@ -36,6 +37,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.DisplayName;
@@ -199,6 +201,24 @@ class BaseStylesheetTest {
         table.getSelectionModel().select(0);
         rows.get(0).applyCss();
         assertThat(fills(rows.get(0))).containsExactly(color(scene, "-selection-inactive"));
+    }
+
+    @Test
+    @DisplayName("Colors and sizes the labels and texts given a text class, as the texts of the themes")
+    void stylesTextClasses() {
+        Label muted = new Label("Muted");
+        muted.getStyleClass().addAll("text-muted", "text-small");
+        Text error = new Text("Error");
+        error.getStyleClass().addAll("text-error", "text-bold");
+        Label code = new Label("SO-1");
+        code.getStyleClass().add("monospace");
+        Scene scene = themed(ThemeMode.LIGHT, muted, error, code);
+
+        assertThat(muted.getTextFill()).isEqualTo(color(scene, "-text-muted"));
+        assertThat(muted.getFont().getSize()).isEqualTo(11);
+        assertThat(error.getFill()).isEqualTo(color(scene, "-text-error"));
+        assertThat(error.getFont().getStyle()).containsIgnoringCase("bold");
+        assertThat(code.getFont().getFamily()).isEqualTo(Font.font("monospace", 13).getFamily());
     }
 
     /**
