@@ -28,7 +28,6 @@
     -fx-light-text-color: -text-default;
     -fx-dark-text-color: -text-default;
     -fx-mid-text-color: -text-default;
-    -fx-prompt-text-fill: -text-secondary;
     -fx-mark-color: -icon-default;
     -fx-mark-highlight-color: transparent;
     -fx-box-border: -island-border;
@@ -481,9 +480,12 @@
     -fx-background-color: derive(-accent, -8%);
 }
 
+/* The prompt is given its color here rather than on the root: Modena colors it on the field itself, darker than the
+   field, which leaves it nearly invisible on a dark one */
 .text-input {
     -fx-highlight-fill: -selection-active;
     -fx-highlight-text-fill: -text-default;
+    -fx-prompt-text-fill: -text-secondary;
 }
 
 .text-field,
