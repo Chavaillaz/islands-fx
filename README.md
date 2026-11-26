@@ -204,8 +204,9 @@ the `clean` keeping the data of an earlier build out of it.
 
 A release is made by the maintainer, from a clean working tree: `sh release.sh` asks for the version, sets it
 in the POM and in the dependency this page shows, and pushes that commit as a tag of the same name. `master`
-keeps its snapshot version, and takes the README naming the new version in a commit of its own, to push with
-the next ones.
+then takes the README naming the new version, and moves to the next minor version, such as `2.2.0-SNAPSHOT`
+after `2.1.0`, unless it builds a later one already, each in a commit of its own to push with the next ones:
+Maven sorts the snapshot of a version before its release.
 Publishing a GitHub release for that tag then starts the [workflow](.github/workflows/maven-publish.yml)
 building, signing and publishing the artifacts to Maven Central, and publishing the JAR to GitHub Packages. The
 same workflow publishes the snapshot of `master` to GitHub Packages once the code quality checks pass on a push,

@@ -34,7 +34,20 @@ git tag "${newVersion}"
 git push origin "${newVersion}"
 git reset HEAD~1
 git checkout pom.xml
-# Master keeps its snapshot version, and its README names the version released, unless it did already
+# The README of master names the version released, unless it did already
 if ! git diff --quiet README.md; then
     git commit -m "Name version ${newVersion} in the README" README.md
+fi
+# Master moves to the next minor version, Maven sorting the snapshot of a version before its release, unless it
+# builds a later minor or major already: after a patch release, or while preparing the next major. The version it
+# builds is the <version> right under <project>, the only one indented once
+masterVersion=$(sed -n 's:^    <version>\(.*\)</version>$:\1:p' pom.xml)
+nextVersion=$(awk -v released="${newVersion}" -v current="${masterVersion}" 'BEGIN {
+    split(released, r, "."); split(current, c, "[.-]")
+    if (c[1] + 0 > r[1] + 0 || c[1] + 0 == r[1] + 0 && c[2] + 0 > r[2] + 0) exit
+    printf "%d.%d.0-SNAPSHOT", r[1], r[2] + 1
+}')
+if [ -n "${nextVersion}" ]; then
+    mvn versions:set -DnewVersion="${nextVersion}" -DgenerateBackupPoms=false
+    git commit -m "Raise the snapshot past release ${newVersion}" pom.xml
 fi
