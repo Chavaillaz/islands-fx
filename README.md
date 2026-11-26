@@ -146,6 +146,10 @@ toolbars:
 workbench.registerActions(refresh, save);
 ```
 
+`Shortcut+Shift+A` opens the search of these actions over the window: the words typed list the actions whose text,
+menu or description holds them, the best matches first, and the enter key performs the one selected. The action
+opening it, `workbench.getSearchAction()`, can stand in a menu or a toolbar as well.
+
 ### Icons
 
 The icons of the library are the constants of `Icons`. An application adds its own with an enumeration implementing

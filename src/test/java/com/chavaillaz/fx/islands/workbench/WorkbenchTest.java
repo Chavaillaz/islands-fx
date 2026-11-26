@@ -245,9 +245,8 @@ class WorkbenchTest {
         assertThat(scene.getAccelerators()).containsKey(showRecords);
 
         systemWorkbench.setMainMenu(List.of(new Menu("View", null, ActionMenus.createItem(records.getToggleAction()))));
-        systemWorkbench.registerActions(records.getToggleAction(), Action.builder("test.refresh", "Refresh")
-                .accelerator(KeyCombination.keyCombination("Shortcut+R")).handler(() -> { }).build());
+        systemWorkbench.registerActions(records.getToggleAction());
         assertThat(scene.getAccelerators()).doesNotContainKey(showRecords)
-                .containsKey(KeyCombination.keyCombination("Shortcut+R"));
+                .containsKey(systemWorkbench.getSearchAction().getAccelerator());
     }
 }

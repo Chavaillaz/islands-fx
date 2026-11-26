@@ -1,5 +1,7 @@
 package com.chavaillaz.fx.islands.workbench;
 
+import static java.util.Objects.requireNonNullElse;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -12,11 +14,14 @@ import java.util.Set;
 import javafx.css.PseudoClass;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.RadioMenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -30,6 +35,7 @@ import org.jspecify.annotations.Nullable;
 
 import com.chavaillaz.fx.islands.action.Action;
 import com.chavaillaz.fx.islands.action.ActionButtons;
+import com.chavaillaz.fx.islands.action.ActionMenus;
 import com.chavaillaz.fx.islands.icon.Icons;
 import com.chavaillaz.fx.islands.internal.Texts;
 
@@ -43,7 +49,8 @@ import com.chavaillaz.fx.islands.internal.Texts;
  * toolbar.
  * <p>
  * The workbench knows the actions it shows, those of its tool windows and of its main menu, and those the application
- * {@link #registerActions(Action...) registers}: their shortcuts work wherever the focus stands in the window.
+ * {@link #registerActions(Action...) registers}: their shortcuts work wherever the focus stands in the window, and the
+ * {@link #getSearchAction() search of the actions} finds them.
  * <p>
  * It carries the style class {@code workbench}, the island of the content {@code content-island}, and those of the
  * tool windows {@code tool-window}. The islands carry the pseudo-classes {@code :left-stripe} and
@@ -66,8 +73,15 @@ public final class Workbench {
     private final ToolWindowStripe rightStripe = new ToolWindowStripe(ToolWindowAnchor.RIGHT);
     private final List<ToolWindow> toolWindows = new ArrayList<>();
     private final List<Action> actions = new ArrayList<>();
+    private final List<ActionSearch.Entry> menuEntries = new ArrayList<>();
     private final Map<KeyCombination, Runnable> shortcuts = new LinkedHashMap<>();
     private final Set<KeyCombination> systemMenuShortcuts = new HashSet<>();
+    private final ActionSearch search = new ActionSearch(this::searchEntries);
+    private final Action searchAction = Action.builder("workbench.searchActions", Texts.get("search.action"))
+            .icon(Icons.SEARCH)
+            .accelerator(KeyCombination.keyCombination("Shortcut+Shift+A"))
+            .handler(search::open)
+            .build();
 
     /**
      * Creates a workbench without content nor tool window yet, its main menu standing in the menu bar of the system
@@ -85,7 +99,7 @@ public final class Workbench {
     Workbench(boolean systemMenuBar) {
         this.systemMenuBar = systemMenuBar;
         root.getStyleClass().add("workbench");
-        root.getChildren().add(layout);
+        root.getChildren().addAll(layout, search);
         content.getStyleClass().add("content-island");
         layout.setTop(mainToolbar.getNode());
         layout.setLeft(leftStripe);
@@ -99,6 +113,7 @@ public final class Workbench {
                 scene.getAccelerators().putAll(shortcuts);
             }
         });
+        registerActions(searchAction);
     }
 
     /**
@@ -166,8 +181,8 @@ public final class Workbench {
 
     /**
      * Registers actions the workbench does not show by itself, such as those of the toolbars and the headers of the
-     * application: their shortcuts work wherever the focus stands in the window. An action registered already, and a
-     * shortcut the workbench knows already, are left as they are.
+     * application: their shortcuts work wherever the focus stands in the window, and the search of the actions finds
+     * them. An action registered already, and a shortcut the workbench knows already, are left as they are.
      *
      * @param actions the actions
      */
@@ -178,6 +193,17 @@ public final class Workbench {
                 addShortcut(action.getAccelerator(), action::perform);
             }
         }
+    }
+
+    /**
+     * Gives the action opening the search of the actions, whose shortcut is {@code Shortcut+Shift+A}: a field over the
+     * window, listing the actions the workbench knows whose text, menu or description holds the words typed, and
+     * performing the one chosen. An application can show it in a menu or a toolbar as well.
+     *
+     * @return the action
+     */
+    public Action getSearchAction() {
+        return searchAction;
     }
 
     /**
@@ -193,12 +219,12 @@ public final class Workbench {
     /**
      * Gives the window its main menu, once: in the menu bar of the system on macOS, elsewhere in a menu opened by a
      * button heading the main toolbar, whose shortcuts are then given to the scene, so that they work while the menu
-     * is closed.
+     * is closed. The search of the actions finds the items of the menus, under the path of their menus.
      *
      * @param menus the menus, in the order of the menu bar
      */
     public void setMainMenu(List<Menu> menus) {
-        addMenuShortcuts(menus);
+        addMenuEntries(menus, "");
         if (systemMenuBar) {
             MenuBar menuBar = new MenuBar();
             menuBar.getMenus().setAll(menus);
@@ -232,19 +258,46 @@ public final class Workbench {
     }
 
     /**
-     * Makes the shortcuts of the items of menus known: handled by the menu bar of the system where the main menu
-     * stands in it, otherwise firing the item from the scene, whatever action held the shortcut.
+     * Gives the entries of the search for the actions the workbench knows: those of its main menu under the path of
+     * their menus, then the others, the action opening the search left out.
+     *
+     * @return the entries, each action once
      */
-    private void addMenuShortcuts(List<? extends MenuItem> items) {
+    List<ActionSearch.Entry> searchEntries() {
+        Map<Action, ActionSearch.Entry> entries = new LinkedHashMap<>();
+        menuEntries.forEach(entry -> entries.putIfAbsent(entry.action(), entry));
+        actions.forEach(action -> entries.putIfAbsent(action, new ActionSearch.Entry(action, "")));
+        entries.remove(searchAction);
+        return List.copyOf(entries.values());
+    }
+
+    /**
+     * Gives the search of the actions, for the tests to look into.
+     */
+    ActionSearch getSearch() {
+        return search;
+    }
+
+    /**
+     * Makes the items of menus found by the search, and their shortcuts known: handled by the menu bar of the system
+     * where the main menu stands in it, otherwise firing the item from the scene, whatever action held the shortcut.
+     */
+    private void addMenuEntries(List<? extends MenuItem> items, String path) {
         for (MenuItem item : items) {
+            String text = requireNonNullElse(item.getText(), "");
             if (item instanceof Menu menu) {
-                addMenuShortcuts(menu.getItems());
-            } else if (item.getAccelerator() instanceof KeyCombination accelerator && systemMenuBar) {
-                systemMenuShortcuts.add(accelerator);
-                removeShortcut(accelerator);
-            } else if (item.getAccelerator() instanceof KeyCombination accelerator) {
-                removeShortcut(accelerator);
-                addShortcut(accelerator, item::fire);
+                addMenuEntries(menu.getItems(), path.isEmpty() ? text : path + " › " + text);
+            } else if (!(item instanceof SeparatorMenuItem) && !text.isEmpty()) {
+                Action action = ActionMenus.getAction(item);
+                menuEntries.add(new ActionSearch.Entry(action == null ? wrap(item, path) : action, path));
+                KeyCombination accelerator = item.getAccelerator();
+                if (accelerator != null && systemMenuBar) {
+                    systemMenuShortcuts.add(accelerator);
+                    removeShortcut(accelerator);
+                } else if (accelerator != null) {
+                    removeShortcut(accelerator);
+                    addShortcut(accelerator, item::fire);
+                }
             }
         }
     }
@@ -265,6 +318,33 @@ public final class Workbench {
         if (runnable != null && scene != null) {
             scene.getAccelerators().remove(accelerator, runnable);
         }
+    }
+
+    /**
+     * Gives the action standing for an item of a menu the application made itself, choosing it as a click does.
+     */
+    private static Action wrap(MenuItem item, String path) {
+        Action.Builder builder = Action.builder("menu." + path + '.' + item.getText(), item.getText())
+                .disabled(item.disableProperty())
+                .handler(() -> choose(item));
+        if (item.getAccelerator() != null) {
+            builder.accelerator(item.getAccelerator());
+        }
+        if (item instanceof CheckMenuItem check) {
+            builder.selected(check.selectedProperty());
+        } else if (item instanceof RadioMenuItem radio) {
+            builder.selected(radio.selectedProperty());
+        }
+        return builder.build();
+    }
+
+    private static void choose(MenuItem item) {
+        if (item instanceof CheckMenuItem check) {
+            check.setSelected(!check.isSelected());
+        } else if (item instanceof RadioMenuItem radio) {
+            radio.setSelected(true);
+        }
+        item.fire();
     }
 
     private static Island createIsland(ToolWindow toolWindow) {

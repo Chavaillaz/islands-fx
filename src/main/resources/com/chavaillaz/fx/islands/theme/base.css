@@ -176,6 +176,31 @@
     -fx-text-fill: -text-error;
 }
 
+/* The search of the actions, popping up under the main toolbar as a menu does */
+.action-search {
+    -fx-background-color: -popup-border, -popup-bg;
+    -fx-background-insets: 0, 1px;
+    -fx-background-radius: 8px, 7px;
+    -fx-padding: 6px;
+    -fx-spacing: 6px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 24, 0, 0, 6);
+}
+
+.action-search-list > .virtual-flow > .clipped-container > .sheet > .list-cell {
+    -fx-background-radius: 4px;
+    -fx-padding: 4px 8px 4px 8px;
+}
+
+.action-search-list > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected {
+    -fx-background-color: -selection-active;
+}
+
+.action-search-secondary,
+.action-search-shortcut,
+.action-search-list > .placeholder > .label {
+    -fx-text-fill: -text-secondary;
+}
+
 /* ------------------------------------------------------------------------------------------- Action buttons */
 
 .action-button {

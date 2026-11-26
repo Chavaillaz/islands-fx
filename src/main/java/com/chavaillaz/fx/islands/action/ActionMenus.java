@@ -6,6 +6,7 @@ import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
+import org.jspecify.annotations.Nullable;
 
 import com.chavaillaz.fx.islands.icon.IconView;
 
@@ -13,7 +14,8 @@ import com.chavaillaz.fx.islands.icon.IconView;
  * Shows actions as menu items: the menus of a main menu, or the items of a context menu.
  * <p>
  * An item follows its action: it shows its text, icon and shortcut, is disabled along with it, and a toggle action is
- * shown as a check menu item reflecting whether the action is selected.
+ * shown as a check menu item reflecting whether the action is selected. The action an item shows is found back with
+ * {@link #getAction(MenuItem)}.
  */
 public final class ActionMenus {
 
@@ -71,6 +73,16 @@ public final class ActionMenus {
         };
     }
 
+    /**
+     * Gives the action an item shows, as the workbench finds the actions of its main menu.
+     *
+     * @param item the item
+     * @return the action, or {@code null} for an item this class did not create
+     */
+    public static @Nullable Action getAction(MenuItem item) {
+        return item.getProperties().get(Action.class) instanceof Action action ? action : null;
+    }
+
     private static MenuItem createActionItem(Action action) {
         MenuItem item;
         if (action.isToggle()) {
@@ -86,6 +98,7 @@ public final class ActionMenus {
             item = new MenuItem(action.getText());
             item.setOnAction(event -> action.perform());
         }
+        item.getProperties().put(Action.class, action);
         item.setMnemonicParsing(false);
         item.setAccelerator(action.getAccelerator());
         item.disableProperty().bind(action.disabledProperty());
