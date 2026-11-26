@@ -134,6 +134,13 @@ workbench.showNotification(Notification.builder(Tone.DANGER, "Could not load the
         .build());
 ```
 
+The window opens as the user left it, its bounds, its tool windows and the theme chosen kept in the preferences of
+the application, once the tool windows are docked and before the stage shows:
+
+```java
+new WorkbenchState(Preferences.userNodeForPackage(App.class)).manage(stage, workbench, themes);
+```
+
 ### Actions
 
 ```java

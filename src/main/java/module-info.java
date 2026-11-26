@@ -11,11 +11,12 @@
  *     <li>{@link com.chavaillaz.fx.islands.icon}: the icons, outlines the theme colors</li>
  *     <li>{@link com.chavaillaz.fx.islands.control}: small controls, such as badges and empty states</li>
  * </ul>
- * JavaFX, which the application provides, and JSpecify are required transitively, the API of this module exposing
- * their types.
+ * JavaFX, which the application provides, JSpecify, and the preferences of Java, where the state of the main window is
+ * kept, are required transitively, the API of this module exposing their types.
  */
 module com.chavaillaz.fx.islands {
 
+    requires transitive java.prefs;
     requires transitive javafx.controls;
     requires transitive org.jspecify;
 
