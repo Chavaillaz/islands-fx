@@ -171,6 +171,11 @@
     -fx-pref-height: 14px;
 }
 
+/* The percentage written under the pie of a progress known leaves the pie no room in so small an indicator */
+.task-status .progress-indicator .percentage {
+    -fx-font-size: 0.01px;
+}
+
 .task-status:failed,
 .status-bar .task-status:failed {
     -fx-text-fill: -text-error;

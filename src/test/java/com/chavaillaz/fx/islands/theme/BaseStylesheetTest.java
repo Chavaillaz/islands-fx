@@ -6,12 +6,14 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import javafx.application.ColorScheme;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.css.PseudoClass;
+import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -31,6 +33,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.skin.DatePickerSkin;
+import javafx.scene.image.PixelReader;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
@@ -52,6 +55,7 @@ import com.chavaillaz.fx.islands.control.Tone;
 import com.chavaillaz.fx.islands.control.ToneRows;
 import com.chavaillaz.fx.islands.control.Validation;
 import com.chavaillaz.fx.islands.icon.Icons;
+import com.chavaillaz.fx.islands.workbench.TaskStatus;
 import com.chavaillaz.fx.islands.workbench.ToolWindow;
 import com.chavaillaz.fx.islands.workbench.Workbench;
 
@@ -222,6 +226,24 @@ class BaseStylesheetTest {
                 .filter(Font.getFamilies()::contains)
                 .findFirst()
                 .orElse(Font.font("monospace", 13).getFamily()));
+    }
+
+    @Test
+    @DisplayName("Draws how far a task went in its status, the percentage leaving the room to the pie")
+    void drawsTaskProgress() {
+        TaskStatus status = new TaskStatus();
+        status.running("Synchronizing", 0.6);
+        Scene scene = themed(ThemeMode.LIGHT, status);
+        Bounds pie = status.getGraphic().localToScene(status.getGraphic().getLayoutBounds());
+        PixelReader pixels = scene.getRoot().snapshot(null, null).getPixelReader();
+        int background = pixels.getArgb((int) scene.getWidth() - 1, (int) scene.getHeight() - 1);
+
+        long drawn = IntStream.range((int) pie.getMinY(), (int) pie.getMaxY())
+                .mapToLong(y -> IntStream.range((int) pie.getMinX(), (int) pie.getMaxX())
+                        .filter(x -> pixels.getArgb(x, y) != background)
+                        .count())
+                .sum();
+        assertThat(drawn).isGreaterThan(Math.round(pie.getWidth() * pie.getHeight() / 3));
     }
 
     /**
