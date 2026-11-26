@@ -215,14 +215,33 @@
     -fx-stroke: -text-over-accent;
 }
 
-/* ------------------------------------------------------------------------------------- Tables and tree tables */
+/* ------------------------------------------------------------------------------ Lists, trees and tables */
 
+/* Framed as a text area is, among the other controls */
+.list-view,
+.tree-view,
 .table-view,
-.tree-table-view,
-.table-view:focused,
-.tree-table-view:focused {
+.tree-table-view {
+    -fx-background-color: -control-border, -island-bg;
+    -fx-background-insets: 0, 1px;
+    -fx-background-radius: 4px, 3px;
+    -fx-padding: 1px;
+}
+
+/* Unframed where they fill an island, which frames them already: as the content of the window or of a tool window,
+   under its header, or deeper in it with the style class edge-to-edge */
+.edge-to-edge,
+.island > .list-view,
+.island > .tree-view,
+.island > .table-view,
+.island > .tree-table-view,
+.tool-window > * > .list-view,
+.tool-window > * > .tree-view,
+.tool-window > * > .table-view,
+.tool-window > * > .tree-table-view {
     -fx-background-color: transparent;
     -fx-background-insets: 0;
+    -fx-background-radius: 0;
     -fx-padding: 0;
 }
 
@@ -628,14 +647,6 @@
 .check-box:indeterminate > .box > .mark,
 .radio-button:selected > .radio > .dot {
     -fx-background-color: -text-over-accent;
-}
-
-.list-view,
-.tree-view {
-    -fx-background-color: -control-border, -island-bg;
-    -fx-background-insets: 0, 1px;
-    -fx-background-radius: 4px, 3px;
-    -fx-padding: 1px;
 }
 
 .list-cell,
