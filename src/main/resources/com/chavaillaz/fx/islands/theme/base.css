@@ -610,6 +610,29 @@
     -fx-padding: 4px 8px 4px 8px;
 }
 
+/* A text field searching something, between a magnifier and a button clearing its text (see SearchField) */
+.search-field {
+    -fx-padding: 4px 4px 4px 6px;
+}
+
+.search-field-icon .icon-shape,
+.search-field-clear .icon-shape {
+    -fx-stroke: -icon-muted;
+}
+
+.search-field-clear {
+    -fx-background-radius: 3px;
+    -fx-padding: 2px;
+}
+
+.search-field-clear:hover {
+    -fx-background-color: -toolbar-hovered;
+}
+
+.search-field-clear:hover .icon-shape {
+    -fx-stroke: -icon-default;
+}
+
 /* Inset by the width of its border, which its content would otherwise paint over */
 .text-area {
     -fx-padding: 1px;

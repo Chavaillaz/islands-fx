@@ -196,6 +196,12 @@ public enum AppIcons implements Icon {
 An icon is stroked in the color of `-icon-default`, which its style class, `icon-` followed by its name in lowercase
 (`icon-history`), can change.
 
+### Controls
+
+A few controls complete those of JavaFX: a `Badge`, a short text tinted after its tone such as the status of a
+record, an `EmptyState`, what an area shows while it has nothing to show, with links to the actions filling it, and a
+`SearchField`, a text field between a magnifier and a button clearing it, as the escape key does.
+
 ### FXML
 
 The controls of the library can be declared in FXML, an icon by the name of one of the `Icons`, or with
