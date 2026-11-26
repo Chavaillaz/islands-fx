@@ -3,13 +3,18 @@ package com.chavaillaz.fx.islands.theme;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 import javafx.application.ColorScheme;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Subscription;
 import org.junit.jupiter.api.DisplayName;
@@ -26,6 +31,23 @@ class ThemeManagerTest {
 
     private final SimpleObjectProperty<ColorScheme> system = new SimpleObjectProperty<>(ColorScheme.LIGHT);
 
+    /**
+     * Gives the stylesheets a manager puts first in a scene: those of a theme, then the one naming the monospaced font
+     * of the system, when one is installed.
+     */
+    private static List<String> themed(String... stylesheets) {
+        List<String> themed = new ArrayList<>(List.of(stylesheets));
+        String monospace = ThemeManager.monospaceStylesheet();
+        if (monospace != null) {
+            themed.add(monospace);
+        }
+        return themed;
+    }
+
+    private static String decode(String url) {
+        return new String(Base64.getDecoder().decode(url.substring(url.indexOf(',') + 1)), StandardCharsets.UTF_8);
+    }
+
     @Test
     @DisplayName("Puts the stylesheets of the theme first, before those of the scene")
     void putsThemeStylesheetsFirst() {
@@ -33,8 +55,9 @@ class ThemeManagerTest {
         scene.getStylesheets().add("feature.css");
         new ThemeManager(ThemeMode.DARK, system).apply(scene);
 
-        assertThat(scene.getStylesheets())
-                .containsExactly(Theme.DARK.stylesheets().getFirst(), Theme.BASE_STYLESHEET, "feature.css");
+        List<String> expected = themed(Theme.DARK.stylesheets().getFirst(), Theme.BASE_STYLESHEET);
+        expected.add("feature.css");
+        assertThat(scene.getStylesheets()).containsExactlyElementsOf(expected);
         assertThat(scene.getPreferences().getColorScheme()).isEqualTo(ColorScheme.DARK);
     }
 
@@ -47,7 +70,8 @@ class ThemeManagerTest {
         themes.setMode(ThemeMode.LIGHT);
         themes.apply(scene);
 
-        assertThat(scene.getStylesheets()).containsExactly(Theme.LIGHT.stylesheets().getFirst(), Theme.BASE_STYLESHEET);
+        assertThat(scene.getStylesheets())
+                .containsExactlyElementsOf(themed(Theme.LIGHT.stylesheets().getFirst(), Theme.BASE_STYLESHEET));
         assertThat(scene.getPreferences().getColorScheme()).isEqualTo(ColorScheme.LIGHT);
     }
 
@@ -131,12 +155,13 @@ class ThemeManagerTest {
         themes.apply(scene);
 
         assertThat(themes.getTheme()).isSameAs(contrast);
-        assertThat(scene.getStylesheets())
-                .containsExactly(Theme.DARK.stylesheets().getFirst(), "contrast.css", Theme.BASE_STYLESHEET);
+        assertThat(scene.getStylesheets()).containsExactlyElementsOf(
+                themed(Theme.DARK.stylesheets().getFirst(), "contrast.css", Theme.BASE_STYLESHEET));
 
         themes.setDarkTheme(Theme.DARK);
         themes.apply(scene);
-        assertThat(scene.getStylesheets()).containsExactly(Theme.DARK.stylesheets().getFirst(), Theme.BASE_STYLESHEET);
+        assertThat(scene.getStylesheets())
+                .containsExactlyElementsOf(themed(Theme.DARK.stylesheets().getFirst(), Theme.BASE_STYLESHEET));
         assertThat(themes.getLightTheme()).isSameAs(Theme.LIGHT);
         assertThat(themes.getDarkTheme()).isSameAs(Theme.DARK);
     }
@@ -152,14 +177,41 @@ class ThemeManagerTest {
         themes.apply(scene);
 
         assertThat(themes.getAccent()).isEqualTo(green);
-        assertThat(scene.getStylesheets()).hasSize(3);
+        assertThat(scene.getStylesheets())
+                .hasSize(themed(Theme.DARK.stylesheets().getFirst(), Theme.BASE_STYLESHEET).size() + 1);
         assertThat(BaseStylesheetTest.color(scene, "-accent")).isEqualTo(green);
         assertThat(BaseStylesheetTest.color(scene, "-selection-active"))
                 .isEqualTo(Color.web("#3F9F6A", 0.48));
 
         themes.setAccent(null);
         themes.apply(scene);
-        assertThat(scene.getStylesheets()).containsExactly(Theme.DARK.stylesheets().getFirst(), Theme.BASE_STYLESHEET);
+        assertThat(scene.getStylesheets())
+                .containsExactlyElementsOf(themed(Theme.DARK.stylesheets().getFirst(), Theme.BASE_STYLESHEET));
         assertThat(BaseStylesheetTest.color(scene, "-accent")).isEqualTo(Color.web("#3871E1"));
+    }
+
+    @Test
+    @DisplayName("Names the first monospaced font of the systems installed, or none")
+    void namesMonospacedFont() {
+        String stylesheet = ThemeManager.monospaceStylesheet(List.of("Arial", "DejaVu Sans Mono", "Consolas"));
+
+        assertThat(stylesheet).isNotNull();
+        assertThat(decode(stylesheet)).contains(".monospace", "-fx-font-family: \"Consolas\";");
+        assertThat(ThemeManager.monospaceStylesheet(List.of("Arial", "Courier New"))).isNull();
+    }
+
+    @Test
+    @DisplayName("Shows the texts of the style class monospace in the monospaced font of the system")
+    void showsMonospacedTexts() {
+        Label label = new Label("0x2A");
+        label.getStyleClass().add("monospace");
+        Scene scene = new Scene(new StackPane(label));
+        new ThemeManager(ThemeMode.LIGHT, system).apply(scene);
+        label.applyCss();
+
+        assertThat(label.getFont().getFamily()).isEqualTo(ThemeManager.MONOSPACED_FONTS.stream()
+                .filter(Font.getFamilies()::contains)
+                .findFirst()
+                .orElse("Monospaced"));
     }
 }

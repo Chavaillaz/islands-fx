@@ -1422,6 +1422,7 @@
     -fx-font-size: 15px;
 }
 
+/* An old font such as Courier on most systems: the theme manager names a monospaced font of the system after it */
 .monospace {
     -fx-font-family: monospace;
 }

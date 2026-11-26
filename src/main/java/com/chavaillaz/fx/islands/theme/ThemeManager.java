@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNullElse;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -24,6 +25,7 @@ import javafx.collections.ListChangeListener;
 import javafx.scene.Scene;
 import javafx.scene.control.DialogPane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.PopupWindow;
 import javafx.stage.Window;
 import javafx.util.Subscription;
@@ -44,14 +46,23 @@ import com.chavaillaz.fx.islands.internal.Texts;
  * are the ones of the library unless the application gives its own, and the accent color the one of the theme unless
  * the application chooses another, such as the accent color of the operating system. Popup windows, such as menus
  * and tooltips, take the stylesheets of the window owning them. The alerts of JavaFX show the icons of the library,
- * unless given a graphic of their own.
+ * unless given a graphic of their own, and the texts of the style class {@code monospace} the monospaced font of the
+ * operating system.
  * <p>
  * It is used on the JavaFX application thread.
  */
 public final class ThemeManager {
 
-    /** The beginning of the stylesheets giving an accent color, built for the colors they override. */
-    private static final String ACCENT_PREFIX = "data:text/css;charset=utf-8;base64,";
+    /**
+     * The monospaced fonts of the operating systems, from the most to the least preferred: the first one installed
+     * shows the texts of the style class {@code monospace}, the generic family {@code monospace} of CSS standing for an
+     * old font on most systems, such as Courier.
+     */
+    static final List<String> MONOSPACED_FONTS = List.of(
+            "Menlo", "Cascadia Mono", "Consolas", "DejaVu Sans Mono", "Liberation Mono", "Ubuntu Mono");
+
+    /** The beginning of the stylesheets built for an accent color, or for the monospaced font of the system. */
+    private static final String GENERATED_PREFIX = "data:text/css;charset=utf-8;base64,";
 
     private final ObjectProperty<ThemeMode> mode;
     private final ObjectProperty<Theme> lightTheme = new SimpleObjectProperty<>(this, "lightTheme", Theme.LIGHT);
@@ -269,9 +280,13 @@ public final class ThemeManager {
             themed.add(accentStylesheet(color, current.colorScheme()));
         }
         themed.add(Theme.BASE_STYLESHEET);
+        String monospace = monospaceStylesheet();
+        if (monospace != null) {
+            themed.add(monospace);
+        }
         managedStylesheets.addAll(current.stylesheets());
         List<String> stylesheets = new ArrayList<>(scene.getStylesheets());
-        stylesheets.removeIf(url -> managedStylesheets.contains(url) || url.startsWith(ACCENT_PREFIX));
+        stylesheets.removeIf(url -> managedStylesheets.contains(url) || url.startsWith(GENERATED_PREFIX));
         stylesheets.addAll(0, themed);
         if (!stylesheets.equals(scene.getStylesheets())) {
             scene.getStylesheets().setAll(stylesheets);
@@ -294,7 +309,36 @@ public final class ThemeManager {
                 + "    -tab-selected-bg: " + rgba(accent, dark ? 0.31 : 0.14) + ";\n"
                 + "    -tab-selected-border: " + rgba(accent, dark ? 0.6 : 0.42) + ";\n"
                 + "}\n";
-        return ACCENT_PREFIX + Base64.getEncoder().encodeToString(css.getBytes(StandardCharsets.UTF_8));
+        return stylesheet(css);
+    }
+
+    /**
+     * Gives the stylesheet showing the texts of the style class {@code monospace} in the monospaced font of the
+     * operating system, found the first time a scene is themed.
+     *
+     * @return the URL of the stylesheet, or {@code null} when none of the {@link #MONOSPACED_FONTS} is installed
+     */
+    static @Nullable String monospaceStylesheet() {
+        return MonospaceStylesheet.URL;
+    }
+
+    /**
+     * Builds the stylesheet showing the texts of the style class {@code monospace} in the first of the
+     * {@link #MONOSPACED_FONTS} installed.
+     *
+     * @param families the families of the fonts installed
+     * @return the URL of the stylesheet, or {@code null} when none of the fonts is installed
+     */
+    static @Nullable String monospaceStylesheet(Collection<String> families) {
+        return MONOSPACED_FONTS.stream()
+                .filter(families::contains)
+                .findFirst()
+                .map(font -> stylesheet(".monospace {\n    -fx-font-family: \"" + font + "\";\n}\n"))
+                .orElse(null);
+    }
+
+    private static String stylesheet(String css) {
+        return GENERATED_PREFIX + Base64.getEncoder().encodeToString(css.getBytes(StandardCharsets.UTF_8));
     }
 
     private static String rgba(Color color, double opacity) {
@@ -324,5 +368,13 @@ public final class ThemeManager {
         if (subscription != null) {
             subscription.unsubscribe();
         }
+    }
+
+    /**
+     * Holds the stylesheet naming the monospaced font of the system, found once JavaFX lists the fonts installed.
+     */
+    private static final class MonospaceStylesheet {
+
+        private static final @Nullable String URL = monospaceStylesheet(Font.getFamilies());
     }
 }

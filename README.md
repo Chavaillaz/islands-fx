@@ -270,7 +270,7 @@ change how the themes style them:
 | `text-muted`, `text-secondary`               | a label or a text         | less prominent                            |
 | `text-error`, `text-warning`, `text-success` | a label or a text         | colored after how things stand            |
 | `text-bold`, `text-small`, `text-large`      | a label or a text         | bold, smaller or larger                   |
-| `monospace`                                  | a label or a text         | in a monospaced font                      |
+| `monospace`                                  | a label or a text         | in the monospaced font of the system      |
 
 ### Colors
 

@@ -218,7 +218,10 @@ class BaseStylesheetTest {
         assertThat(muted.getFont().getSize()).isEqualTo(11);
         assertThat(error.getFill()).isEqualTo(color(scene, "-text-error"));
         assertThat(error.getFont().getStyle()).containsIgnoringCase("bold");
-        assertThat(code.getFont().getFamily()).isEqualTo(Font.font("monospace", 13).getFamily());
+        assertThat(code.getFont().getFamily()).isEqualTo(ThemeManager.MONOSPACED_FONTS.stream()
+                .filter(Font.getFamilies()::contains)
+                .findFirst()
+                .orElse(Font.font("monospace", 13).getFamily()));
     }
 
     /**
