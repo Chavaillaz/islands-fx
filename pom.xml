@@ -406,6 +406,31 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <!-- Opens the showcase of the library, "mvn -Pshowcase". It stands in the tests, which it runs from on the
+                 class path, JavaFX telling it does not support that configuration while it works -->
+            <id>showcase</id>
+            <build>
+                <defaultGoal>test-compile exec:exec</defaultGoal>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.7.0</version>
+                        <configuration>
+                            <executable>${java.home}/bin/java</executable>
+                            <classpathScope>test</classpathScope>
+                            <arguments>
+                                <argument>--enable-native-access=ALL-UNNAMED</argument>
+                                <argument>-classpath</argument>
+                                <classpath/>
+                                <argument>com.chavaillaz.fx.islands.showcase.Showcase</argument>
+                            </arguments>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
 </project>

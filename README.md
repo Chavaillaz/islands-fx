@@ -77,6 +77,16 @@ under the identifier of the repository the application declares:
 </server>
 ```
 
+## Showcase
+
+The showcase is the main window of an application taking orders, laid out by the workbench, and a gallery of the
+controls of JavaFX and of the library, each in its usual states, in the theme the user chooses in its menus. It stands
+among the tests, from which a clone of the repository opens it:
+
+```shell
+mvn -Pshowcase
+```
+
 ## Usage
 
 ### The main window
