@@ -108,7 +108,7 @@
 }
 
 .tool-window-header,
-.details-header {
+.content-header {
     -fx-alignment: center-left;
     -fx-min-height: 38px;
     -fx-pref-height: 38px;
@@ -123,11 +123,12 @@
     -fx-font-weight: bold;
 }
 
-.details-header {
+.content-header {
     -fx-padding: 0 8px 0 8px;
 }
 
-.details-tab {
+/* The tab naming what the content shows, as the selected tab of an editor */
+.content-tab {
     -fx-background-color: -tab-selected-border, -tab-selected-bg;
     -fx-background-insets: 0, 1px;
     -fx-background-radius: 6px, 5px;
@@ -147,9 +148,6 @@
     -fx-text-fill: -text-muted;
 }
 
-.status-bar .status-failure {
-    -fx-text-fill: -text-error;
-}
 
 .breadcrumbs {
     -fx-alignment: center-left;
@@ -161,16 +159,21 @@
     -fx-spacing: 16px;
 }
 
-.status-loading {
+.task-status {
     -fx-graphic-text-gap: 6px;
 }
 
-.status-loading .progress-indicator {
+.task-status .progress-indicator {
     -fx-progress-color: -text-muted;
     -fx-min-width: 14px;
     -fx-min-height: 14px;
     -fx-pref-width: 14px;
     -fx-pref-height: 14px;
+}
+
+.task-status:failed,
+.status-bar .task-status:failed {
+    -fx-text-fill: -text-error;
 }
 
 /* ------------------------------------------------------------------------------------------- Action buttons */
@@ -270,7 +273,9 @@
     -fx-padding: 0 8px 0 8px;
 }
 
-.table-view .column-header.align-right .label {
+/* The columns of numbers, given the style class align-right */
+.table-view .column-header.align-right .label,
+.tree-table-view .column-header.align-right .label {
     -fx-alignment: center-right;
 }
 
@@ -315,7 +320,8 @@
     -fx-text-fill: -text-default;
 }
 
-.table-cell.align-right {
+.table-cell.align-right,
+.tree-table-cell.align-right {
     -fx-alignment: center-right;
 }
 
@@ -332,18 +338,6 @@
     -fx-background-color: -icon-muted;
     -fx-shape: "M1.15 0L5.15 4L1.15 8L0 6.85L2.85 4L0 1.15Z";
     -fx-padding: 4px 2.5px 4px 2.5px;
-}
-
-.detail-name {
-    -fx-graphic-text-gap: 6px;
-}
-
-.detail-name:section {
-    -fx-font-weight: bold;
-}
-
-.detail-value:summary {
-    -fx-text-fill: -text-muted;
 }
 
 .table-view .corner,

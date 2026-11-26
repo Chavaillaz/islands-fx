@@ -107,6 +107,19 @@ public void start(Stage stage) {
 the stage shows. The `ThemeManager` applies the theme to the windows opened afterwards, dialogs included, and
 `themes.apply(scene)` applies it to the main window before it shows, so that it never shows unthemed.
 
+The content can be headed by a `ContentHeader`, a tab naming what it shows beside the buttons of its actions, and the
+status bar can tell how a task of the application stands with a `TaskStatus`, which follows a `Task` of JavaFX by
+itself:
+
+```java
+ContentHeader header = new ContentHeader("SO-10042", Icons.RECORD);
+header.getActions().setAll(expandAll, collapseAll);
+
+TaskStatus loading = new TaskStatus();
+workbench.getStatusBar().getWidgets().add(loading);
+loading.follow(loadTask);
+```
+
 ### Actions
 
 ```java
@@ -186,6 +199,17 @@ name.textProperty().subscribe(text -> {
 
 A warning (`setWarning`) marks a value that is doubtful rather than wrong. The marks are the pseudo-classes `:error`
 and `:warning`, which the stylesheets of an application can use as well.
+
+### Style classes
+
+Lists, trees, tables and tree tables are framed as text fields are, unless they fill an island, which frames them
+already: the content of the window, or of a tool window. A few style classes, which the nodes of an application take,
+change how the themes style them:
+
+| Style class    | Given to                                      | Makes it                                             |
+|----------------|-----------------------------------------------|------------------------------------------------------|
+| `edge-to-edge` | a list, a tree, a table or a tree table       | unframed, filling an island deeper than its content  |
+| `align-right`  | a column of a table or of a tree table        | aligned on the right, its header included            |
 
 ### Colors
 
