@@ -15,6 +15,7 @@ import org.jspecify.annotations.Nullable;
 import com.chavaillaz.fx.islands.action.Action;
 import com.chavaillaz.fx.islands.icon.Icon;
 import com.chavaillaz.fx.islands.icon.Icons;
+import com.chavaillaz.fx.islands.internal.Texts;
 
 /**
  * A panel docked on a side of the {@link Workbench}, in an island of its own, which a button of the stripe on that
@@ -51,7 +52,7 @@ public final class ToolWindow {
         actions = builder.actions;
         width = new SimpleDoubleProperty(this, "width", builder.width);
         Action.Builder toggle = Action.builder(id + ".toggle", title)
-                .description("Shows or hides the " + title + " tool window")
+                .description(Texts.format("toolWindow.toggle", title))
                 .icon(icon)
                 .selected(visible)
                 .handler(() -> setVisible(!isVisible()));
@@ -59,7 +60,7 @@ public final class ToolWindow {
             toggle.accelerator(builder.accelerator);
         }
         toggleAction = toggle.build();
-        hideAction = Action.builder(id + ".hide", "Hide")
+        hideAction = Action.builder(id + ".hide", Texts.get("toolWindow.hide"))
                 .icon(Icons.HIDE)
                 .handler(() -> setVisible(false))
                 .build();

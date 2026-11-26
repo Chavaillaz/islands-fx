@@ -227,12 +227,15 @@
                 <configuration>
                     <!-- JavaFX loads its native libraries, which the JDK warns about unless the module is allowed to.
                          The extension running the tests on the JavaFX thread stands in a package of the tests only,
-                         which JUnit creates by reflection. Extends the argLine the JaCoCo agent sets rather than
-                         replacing it -->
+                         which JUnit creates by reflection. The tests run in English, the texts of the library they
+                         check being in the language of the machine otherwise. Extends the argLine the JaCoCo agent
+                         sets rather than replacing it -->
                     <argLine>
                         @{argLine}
                         --enable-native-access=javafx.graphics
                         --add-opens com.chavaillaz.fx.islands/com.chavaillaz.fx.islands=ALL-UNNAMED
+                        -Duser.language=en
+                        -Duser.country=US
                     </argLine>
                 </configuration>
             </plugin>

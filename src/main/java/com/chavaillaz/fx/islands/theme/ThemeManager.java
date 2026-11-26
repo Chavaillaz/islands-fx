@@ -29,6 +29,7 @@ import org.jspecify.annotations.Nullable;
 import com.chavaillaz.fx.islands.action.Action;
 import com.chavaillaz.fx.islands.action.ActionGroup;
 import com.chavaillaz.fx.islands.action.ActionSeparator;
+import com.chavaillaz.fx.islands.internal.Texts;
 
 /**
  * Applies the theme the user chose to the windows of the application, and applies it again when they choose another
@@ -124,10 +125,10 @@ public final class ThemeManager {
      * Creates the menu choosing the theme: light, dark, or following the appearance of the operating system, the
      * choice of the user being checked.
      *
-     * @return the group of the actions choosing each theme, titled {@code Theme}
+     * @return the group of the actions choosing each theme, titled {@code Theme} in English
      */
     public ActionGroup createMenu() {
-        return ActionGroup.of("Theme",
+        return ActionGroup.of(Texts.get("theme.menu"),
                 createChoice(ThemeMode.LIGHT),
                 createChoice(ThemeMode.DARK),
                 ActionSeparator.INSTANCE,

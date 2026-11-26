@@ -188,6 +188,11 @@ The stylesheets of an application can use the colors of the themes, which every 
 }
 ```
 
+### Languages
+
+The texts the library shows, such as the theme menu or the tooltips of its buttons, are in English, French or
+German, after the language of the display (`Locale.Category.DISPLAY`), and in English for any other language.
+
 ## Contributing
 
 A feature request or a bug report is welcome as an issue, and a change as a pull request from a fork.

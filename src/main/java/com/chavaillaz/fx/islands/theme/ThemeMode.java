@@ -1,6 +1,10 @@
 package com.chavaillaz.fx.islands.theme;
 
+import java.util.Locale;
+
 import javafx.application.ColorScheme;
+
+import com.chavaillaz.fx.islands.internal.Texts;
 
 /**
  * The theme the user chose: one of their own, or the one following the appearance of the operating system.
@@ -8,27 +12,21 @@ import javafx.application.ColorScheme;
 public enum ThemeMode {
 
     /** Follows the light or dark appearance of the operating system, switching along with it. */
-    SYSTEM("Sync with OS"),
+    SYSTEM,
 
     /** The light theme, whatever the appearance of the operating system. */
-    LIGHT("Light"),
+    LIGHT,
 
     /** The dark theme, whatever the appearance of the operating system. */
-    DARK("Dark");
-
-    private final String displayName;
-
-    ThemeMode(String displayName) {
-        this.displayName = displayName;
-    }
+    DARK;
 
     /**
-     * Gives the name of the choice, as the menus show it.
+     * Gives the name of the choice, as the menus show it, in the language of the user.
      *
      * @return the name
      */
     public String displayName() {
-        return displayName;
+        return Texts.get("theme." + name().toLowerCase(Locale.ROOT));
     }
 
     /**

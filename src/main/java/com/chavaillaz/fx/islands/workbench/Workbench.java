@@ -25,6 +25,7 @@ import javafx.stage.StageStyle;
 
 import com.chavaillaz.fx.islands.action.ActionButtons;
 import com.chavaillaz.fx.islands.icon.Icons;
+import com.chavaillaz.fx.islands.internal.Texts;
 
 /**
  * The layout of the main window: the main toolbar along the top, the status bar along the bottom, the stripes of tool
@@ -173,7 +174,8 @@ public final class Workbench {
             ContextMenu menu = new ContextMenu();
             menu.getItems().setAll(menus);
             mainToolbar.getLeftItems().addFirst(
-                    ActionButtons.createMenuButton("Main Menu", Icons.MENU, menu, MainToolbar.ICON_SIZE));
+                    ActionButtons.createMenuButton(Texts.get("workbench.mainMenu"), Icons.MENU, menu,
+                            MainToolbar.ICON_SIZE));
             root.sceneProperty().subscribe(scene -> {
                 if (scene != null) {
                     registerAccelerators(scene, menus);
