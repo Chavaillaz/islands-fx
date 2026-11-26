@@ -1020,6 +1020,12 @@
     -fx-padding: 4px 16px 16px 16px;
 }
 
+/* The icon of an alert, after its type: the warning and the error keep the colors of their icons */
+.dialog-icon.icon-info .icon-shape,
+.dialog-icon.icon-help .icon-shape {
+    -fx-stroke: -icon-blue;
+}
+
 /* The controls of a toolbar stand flat on it, their background showing when hovered */
 .main-toolbar .combo-box-base,
 .main-toolbar .split-menu-button,

@@ -20,6 +20,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.scene.Scene;
+import javafx.scene.control.DialogPane;
 import javafx.stage.PopupWindow;
 import javafx.stage.Window;
 import javafx.util.Subscription;
@@ -36,7 +37,8 @@ import com.chavaillaz.fx.islands.action.ActionSeparator;
  * A window is themed through its scene: the stylesheet of the theme and the base stylesheet come first among the
  * stylesheets of the scene, so that a stylesheet added after them can override them, and the color scheme of the scene
  * is the one of the theme, which the window decorations of the operating system follow. Popup windows, such as menus
- * and tooltips, take the stylesheets of the window owning them.
+ * and tooltips, take the stylesheets of the window owning them. The alerts of JavaFX show the icons of the library,
+ * unless given a graphic of their own.
  * <p>
  * It is used on the JavaFX application thread.
  */
@@ -173,6 +175,9 @@ public final class ThemeManager {
             scene.getStylesheets().setAll(stylesheets);
         }
         scene.getPreferences().setColorScheme(current.colorScheme());
+        if (scene.getRoot() instanceof DialogPane pane) {
+            DialogIcons.decorate(pane);
+        }
     }
 
     private Action createChoice(ThemeMode choice) {

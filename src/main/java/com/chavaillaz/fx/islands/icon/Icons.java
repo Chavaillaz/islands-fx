@@ -64,6 +64,9 @@ public enum Icons implements Icon {
     /** An arrow falling into a tray, importing something. */
     IMPORT("M8 2.5v7M5 6.5l3 3 3-3M2.5 10v2.5a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V10"),
 
+    /** An i in a circle, giving some information. */
+    INFO("M14 8a6 6 0 1 1-12 0a6 6 0 1 1 12 0zM8 7.5V11M8 5h.01"),
+
     /** Square brackets around dots, standing for a list of values. */
     LIST("M5.5 2.5h-2v11h2M10.5 2.5h2v11h-2M6 8h.01M8 8h.01M10 8h.01"),
 
