@@ -273,6 +273,11 @@
     -fx-background-color: -toolbar-pressed;
 }
 
+/* The button of a toggle action, such as one showing a panel, while its action is on */
+.action-button:selected {
+    -fx-background-color: -toolbar-pressed;
+}
+
 .main-toolbar .action-button {
     -fx-padding: 5px;
     -fx-background-radius: 6px;

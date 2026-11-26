@@ -10,6 +10,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import javafx.application.ColorScheme;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.css.PseudoClass;
@@ -19,6 +20,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.TraversalDirection;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBase;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.DatePicker;
@@ -51,6 +53,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com.chavaillaz.fx.islands.JavaFxExtension;
+import com.chavaillaz.fx.islands.action.Action;
+import com.chavaillaz.fx.islands.action.ActionButtons;
 import com.chavaillaz.fx.islands.control.Tone;
 import com.chavaillaz.fx.islands.control.ToneRows;
 import com.chavaillaz.fx.islands.control.Validation;
@@ -205,6 +209,20 @@ class BaseStylesheetTest {
         table.getSelectionModel().select(0);
         rows.get(0).applyCss();
         assertThat(fills(rows.get(0))).containsExactly(color(scene, "-selection-inactive"));
+    }
+
+    @Test
+    @DisplayName("Tells whether the button of a toggle action is on")
+    void showsToggleActionSelected() {
+        SimpleBooleanProperty on = new SimpleBooleanProperty(true);
+        ButtonBase button = ActionButtons.create(Action.builder("test.filter", "Filter").icon(Icons.FILTER)
+                .selected(on).handler(() -> on.set(!on.get())).build());
+        Scene scene = themed(ThemeMode.DARK, button);
+        assertThat(fills((Region) button)).containsExactly(color(scene, "-toolbar-pressed"));
+
+        on.set(false);
+        button.applyCss();
+        assertThat(fills((Region) button)).containsOnly(Color.TRANSPARENT);
     }
 
     @Test
