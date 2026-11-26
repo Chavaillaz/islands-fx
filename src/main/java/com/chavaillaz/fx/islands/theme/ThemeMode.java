@@ -7,7 +7,7 @@ import javafx.application.ColorScheme;
 import com.chavaillaz.fx.islands.internal.Texts;
 
 /**
- * The theme the user chose: one of their own, or the one following the appearance of the operating system.
+ * The theme the user chose: the light or the dark one, or the one following the appearance of the operating system.
  */
 public enum ThemeMode {
 
@@ -30,16 +30,17 @@ public enum ThemeMode {
     }
 
     /**
-     * Gives the theme this choice stands for.
+     * Gives the color scheme this choice stands for, whose theme the {@link ThemeManager} applies: the light or the dark
+     * one.
      *
      * @param systemColorScheme the color scheme of the operating system, which {@link #SYSTEM} follows
-     * @return the theme to apply
+     * @return the color scheme of the theme to apply
      */
-    public Theme resolve(ColorScheme systemColorScheme) {
+    public ColorScheme resolve(ColorScheme systemColorScheme) {
         return switch (this) {
-            case SYSTEM -> systemColorScheme == ColorScheme.DARK ? Theme.DARK : Theme.LIGHT;
-            case LIGHT -> Theme.LIGHT;
-            case DARK -> Theme.DARK;
+            case SYSTEM -> systemColorScheme == ColorScheme.DARK ? ColorScheme.DARK : ColorScheme.LIGHT;
+            case LIGHT -> ColorScheme.LIGHT;
+            case DARK -> ColorScheme.DARK;
         };
     }
 }

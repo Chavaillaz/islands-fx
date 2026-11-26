@@ -226,6 +226,17 @@ name.textProperty().subscribe(text -> {
 A warning (`setWarning`) marks a value that is doubtful rather than wrong. The marks are the pseudo-classes `:error`
 and `:warning`, which the stylesheets of an application can use as well.
 
+### Themes
+
+The `ThemeManager` applies the light theme or the dark one, as the user chooses in the menu it creates, or as the
+operating system shows. An application gives its own theme for either, derived from one of the library by a
+stylesheet overriding some of its colors, and changes the accent color, such as to the one of the operating system:
+
+```java
+themes.setDarkTheme(Theme.DARK.derive("contrast", App.class.getResource("contrast.css").toExternalForm()));
+themes.accentProperty().bind(Platform.getPreferences().accentColorProperty());
+```
+
 ### Style classes
 
 Lists, trees, tables and tree tables are framed as text fields are, unless they fill an island, which frames them

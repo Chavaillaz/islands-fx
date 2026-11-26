@@ -18,7 +18,7 @@ class ThemeModeTest {
             "DARK, LIGHT, DARK"
     })
     @DisplayName("Follows the operating system only when chosen to")
-    void followsSystemOnlyWhenChosen(ThemeMode mode, ColorScheme system, Theme expected) {
+    void followsSystemOnlyWhenChosen(ThemeMode mode, ColorScheme system, ColorScheme expected) {
         assertThat(mode.resolve(system)).isEqualTo(expected);
     }
 }
