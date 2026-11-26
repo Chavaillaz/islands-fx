@@ -274,9 +274,13 @@
 }
 
 .stripe {
+    -fx-padding: 0 5px 0 5px;
+}
+
+/* The buttons of the tool windows docked on a side at the top of a stripe, those of the bottom at its bottom */
+.stripe-group {
     -fx-alignment: top-center;
     -fx-spacing: 4px;
-    -fx-padding: 0 5px 0 5px;
 }
 
 .stripe .stripe-button {

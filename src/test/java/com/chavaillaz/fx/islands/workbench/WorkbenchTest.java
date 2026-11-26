@@ -18,6 +18,7 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.junit.jupiter.api.DisplayName;
@@ -90,7 +91,7 @@ class WorkbenchTest {
 
         assertThat(root.getLeft().isVisible()).isFalse();
         assertThat(root.getRight().isVisible()).isTrue();
-        assertThat(((ToolWindowStripe) root.getRight()).getChildren()).singleElement()
+        assertThat(((ToolWindowStripe) root.getRight()).getButtons()).singleElement()
                 .satisfies(button -> assertThat(button.getStyleClass()).contains("stripe-button"));
     }
 
@@ -248,5 +249,41 @@ class WorkbenchTest {
         systemWorkbench.registerActions(records.getToggleAction());
         assertThat(scene.getAccelerators()).doesNotContainKey(showRecords)
                 .containsKey(systemWorkbench.getSearchAction().getAccelerator());
+    }
+
+    @Test
+    @DisplayName("Docks a tool window under the content, its button at the bottom of the left stripe")
+    void docksToolWindowAtBottom() {
+        ToolWindow records = ToolWindow.builder("records", "Orders", Icons.RECORDS, new StackPane()).build();
+        ToolWindow log = ToolWindow.builder("log", "Log", Icons.LIST, new StackPane())
+                .anchor(ToolWindowAnchor.BOTTOM)
+                .build();
+        workbench.addToolWindow(records);
+        workbench.addToolWindow(log);
+
+        ToolWindowStripe stripe = (ToolWindowStripe) root.getLeft();
+        assertThat(stripe.getButtons()).hasSize(2);
+        assertThat(((VBox) stripe.getChildren().getLast()).getChildren()).containsExactly(stripe.getButtons().getLast());
+        assertThat(log.getHeight()).isEqualTo(ToolWindow.DEFAULT_HEIGHT);
+    }
+
+    @Test
+    @DisplayName("Shows one tool window at a time under the content")
+    void showsOneToolWindowAtBottom() {
+        ToolWindow log = ToolWindow.builder("log", "Log", Icons.LIST, new StackPane())
+                .anchor(ToolWindowAnchor.BOTTOM)
+                .build();
+        ToolWindow problems = ToolWindow.builder("problems", "Problems", Icons.WARNING, new StackPane())
+                .anchor(ToolWindowAnchor.BOTTOM)
+                .height(180)
+                .build();
+        workbench.addToolWindow(log);
+        workbench.addToolWindow(problems);
+        assertThat(log.isVisible()).isTrue();
+        assertThat(problems.isVisible()).isFalse();
+
+        problems.getToggleAction().perform();
+        assertThat(problems.isVisible()).isTrue();
+        assertThat(log.isVisible()).isFalse();
     }
 }

@@ -18,11 +18,12 @@ import com.chavaillaz.fx.islands.icon.Icons;
 import com.chavaillaz.fx.islands.internal.Texts;
 
 /**
- * A panel docked on a side of the {@link Workbench}, in an island of its own, which a button of the stripe on that
- * side shows and hides.
+ * A panel docked on a side of the {@link Workbench}, or under its content, in an island of its own, which a button of
+ * a stripe shows and hides.
  * <p>
  * Its header shows its title, the buttons of its actions and a button hiding it. It keeps its width while the window
- * is resized, the content taking what is left, and the user resizes it by dragging the gap beside it.
+ * is resized, or its height when docked at the bottom, the content taking what is left, and the user resizes it by
+ * dragging the gap beside it, or above it.
  */
 public final class ToolWindow {
 
@@ -32,6 +33,12 @@ public final class ToolWindow {
     /** The narrowest a tool window gets while the window has the room, in pixels. */
     public static final double MIN_WIDTH = 160;
 
+    /** The height of a tool window docked at the bottom unless given another one, in pixels. */
+    public static final double DEFAULT_HEIGHT = 240;
+
+    /** The lowest a tool window docked at the bottom gets while the window has the room, in pixels. */
+    public static final double MIN_HEIGHT = 100;
+
     private final String id;
     private final String title;
     private final Icon icon;
@@ -40,6 +47,7 @@ public final class ToolWindow {
     private final List<Action> actions;
     private final BooleanProperty visible = new SimpleBooleanProperty(this, "visible", true);
     private final DoubleProperty width;
+    private final DoubleProperty height;
     private final Action toggleAction;
     private final Action hideAction;
 
@@ -51,6 +59,7 @@ public final class ToolWindow {
         content = builder.content;
         actions = builder.actions;
         width = new SimpleDoubleProperty(this, "width", builder.width);
+        height = new SimpleDoubleProperty(this, "height", builder.height);
         Action.Builder toggle = Action.builder(id + ".toggle", title)
                 .description(Texts.format("toolWindow.toggle", title))
                 .icon(icon)
@@ -207,6 +216,33 @@ public final class ToolWindow {
     }
 
     /**
+     * Gives the height the tool window takes when docked at the bottom, while the window has the room, in pixels.
+     *
+     * @return the property of the height, which dragging the gap above the tool window changes
+     */
+    public DoubleProperty heightProperty() {
+        return height;
+    }
+
+    /**
+     * Gives the height the tool window takes when docked at the bottom, while the window has the room.
+     *
+     * @return the height in pixels
+     */
+    public double getHeight() {
+        return height.get();
+    }
+
+    /**
+     * Changes the height the tool window takes when docked at the bottom, while the window has the room.
+     *
+     * @param height the height in pixels
+     */
+    public void setHeight(double height) {
+        this.height.set(height);
+    }
+
+    /**
      * Describes a tool window, step by step, before {@link #build() building} it.
      */
     public static final class Builder {
@@ -217,6 +253,7 @@ public final class ToolWindow {
         private final Node content;
         private ToolWindowAnchor anchor = ToolWindowAnchor.LEFT;
         private double width = DEFAULT_WIDTH;
+        private double height = DEFAULT_HEIGHT;
         private @Nullable KeyCombination accelerator;
         private List<Action> actions = List.of();
 
@@ -246,6 +283,17 @@ public final class ToolWindow {
          */
         public Builder width(double width) {
             this.width = width;
+            return this;
+        }
+
+        /**
+         * Gives the tool window its height when docked at the bottom, {@link #DEFAULT_HEIGHT} unless told otherwise.
+         *
+         * @param height the height in pixels
+         * @return this builder
+         */
+        public Builder height(double height) {
+            this.height = height;
             return this;
         }
 

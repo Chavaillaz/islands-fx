@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import javafx.css.PseudoClass;
 import javafx.scene.Node;
@@ -43,7 +44,7 @@ import com.chavaillaz.fx.islands.internal.Texts;
 /**
  * The layout of the main window: the main toolbar along the top, the status bar along the bottom, the stripes of tool
  * window buttons along the sides, and the islands in between: the content in the middle, the tool windows docked
- * beside it.
+ * beside it, and the one docked under it.
  * <p>
  * The workbench is the scene of its window ({@link #createScene(Stage)}), its main toolbar standing in the title bar.
  * Its main menu stands in the menu bar of macOS, and elsewhere in a menu opened by the first button of the main
@@ -156,7 +157,8 @@ public final class Workbench {
 
     /**
      * Docks a tool window on its side, after those already docked there, and adds its button to the stripe of that
-     * side.
+     * side, or at the bottom of the left stripe for a tool window docked at the bottom, which is hidden when another one
+     * shows there already.
      *
      * @param toolWindow the tool window
      * @throws IllegalArgumentException when a tool window of the same identifier is already docked
@@ -165,11 +167,14 @@ public final class Workbench {
         if (toolWindows.stream().anyMatch(each -> each.getId().equals(toolWindow.getId()))) {
             throw new IllegalArgumentException("A tool window named " + toolWindow.getId() + " is already docked");
         }
+        if (toolWindow.getAnchor() == ToolWindowAnchor.BOTTOM) {
+            showAloneAtBottom(toolWindow);
+        }
         toolWindows.add(toolWindow);
         registerActions(toolWindow.getToggleAction());
         toolWindow.getActions().forEach(this::registerActions);
         islands.dock(toolWindow, createIsland(toolWindow));
-        (toolWindow.getAnchor() == ToolWindowAnchor.LEFT ? leftStripe : rightStripe).add(toolWindow);
+        (toolWindow.getAnchor() == ToolWindowAnchor.RIGHT ? rightStripe : leftStripe).add(toolWindow);
     }
 
     /**
@@ -268,6 +273,25 @@ public final class Workbench {
         HeaderBar.setSystemButtonHeight(stage, MainToolbar.HEIGHT);
         stage.setScene(scene);
         return scene;
+    }
+
+    /**
+     * Makes a tool window docked at the bottom the only one showing there: hidden when docked while another one shows,
+     * and hiding the others once shown.
+     */
+    private void showAloneAtBottom(ToolWindow toolWindow) {
+        if (toolWindow.isVisible() && bottomToolWindows().anyMatch(ToolWindow::isVisible)) {
+            toolWindow.setVisible(false);
+        }
+        toolWindow.visibleProperty().subscribe(shown -> {
+            if (shown) {
+                bottomToolWindows().filter(other -> other != toolWindow).forEach(other -> other.setVisible(false));
+            }
+        });
+    }
+
+    private Stream<ToolWindow> bottomToolWindows() {
+        return toolWindows.stream().filter(each -> each.getAnchor() == ToolWindowAnchor.BOTTOM);
     }
 
     /**

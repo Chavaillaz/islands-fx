@@ -107,6 +107,10 @@ public void start(Stage stage) {
 the stage shows. The `ThemeManager` applies the theme to the windows opened afterwards, dialogs included, and
 `themes.apply(scene)` applies it to the main window before it shows, so that it never shows unthemed.
 
+A tool window docks on the left, unless told otherwise: on the right, or under the content, where one shows at a time,
+such as a log or the output of a task (`.anchor(ToolWindowAnchor.BOTTOM)`), its button at the bottom of the left
+stripe.
+
 The content can be headed by a `ContentHeader`, a tab naming what it shows beside the buttons of its actions, and the
 status bar can tell how a task of the application stands with a `TaskStatus`, which follows a `Task` of JavaFX by
 itself:

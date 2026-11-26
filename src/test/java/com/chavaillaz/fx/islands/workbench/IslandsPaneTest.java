@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import javafx.event.EventType;
 import javafx.geometry.Bounds;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -94,6 +95,48 @@ class IslandsPaneTest {
         assertThat(pane.prefHeight(-1)).isZero();
     }
 
+    @Test
+    @DisplayName("Gives the tool window at the bottom its height, under the content and between those of the sides")
+    void givesBottomToolWindowItsHeight() {
+        ToolWindow bottom = toolWindow("bottom", ToolWindowAnchor.BOTTOM, 0);
+        bottom.setHeight(200);
+        Region bottomIsland = new StackPane();
+        pane.dock(left, leftIsland);
+        pane.dock(bottom, bottomIsland);
+        layout(1000);
+
+        assertThat(leftIsland.getBoundsInParent().getHeight()).isEqualTo(500);
+        assertThat(content.getBoundsInParent()).satisfies(bounds -> {
+            assertThat(bounds.getMinX()).isEqualTo(306);
+            assertThat(bounds.getMaxX()).isEqualTo(1000);
+            assertThat(bounds.getHeight()).isEqualTo(500 - 200 - IslandsPane.GAP);
+        });
+        assertThat(bottomIsland.getBoundsInParent()).satisfies(bounds -> {
+            assertThat(bounds.getMinX()).isEqualTo(306);
+            assertThat(bounds.getMinY()).isEqualTo(300);
+            assertThat(bounds.getMaxY()).isEqualTo(500);
+        });
+        assertThat(pane.prefWidth(-1)).isEqualTo(IslandsPane.MIN_CONTENT_WIDTH + 300 + IslandsPane.GAP);
+    }
+
+    @Test
+    @DisplayName("Resizes the tool window at the bottom by the gap above it, within the room the content leaves")
+    void resizesBottomToolWindowByItsGap() {
+        ToolWindow bottom = toolWindow("bottom", ToolWindowAnchor.BOTTOM, 0);
+        pane.dock(bottom, new StackPane());
+        layout(1000);
+
+        assertThat(divider(0).getCursor()).isEqualTo(Cursor.V_RESIZE);
+        dragVertically(divider(0), 257, 207);
+        assertThat(bottom.getHeight()).isEqualTo(ToolWindow.DEFAULT_HEIGHT + 50);
+
+        dragVertically(divider(0), 207, 0);
+        assertThat(bottom.getHeight()).isEqualTo(500 - IslandsPane.MIN_CONTENT_HEIGHT - IslandsPane.GAP);
+
+        dragVertically(divider(0), 0, 1000);
+        assertThat(bottom.getHeight()).isEqualTo(ToolWindow.MIN_HEIGHT);
+    }
+
     private static ToolWindow toolWindow(String id, ToolWindowAnchor anchor, double width) {
         return ToolWindow.builder(id, id, Icons.RECORDS, new StackPane())
                 .anchor(anchor)
@@ -116,6 +159,14 @@ class IslandsPaneTest {
     private void drag(Node divider, double fromX, double toX) {
         divider.fireEvent(mouseEvent(MouseEvent.MOUSE_PRESSED, fromX));
         divider.fireEvent(mouseEvent(MouseEvent.MOUSE_DRAGGED, toX));
+        pane.layout();
+    }
+
+    private void dragVertically(Node divider, double fromY, double toY) {
+        divider.fireEvent(new MouseEvent(MouseEvent.MOUSE_PRESSED, 0, 0, 0, fromY, MouseButton.PRIMARY, 1,
+                false, false, false, false, true, false, false, false, false, false, null));
+        divider.fireEvent(new MouseEvent(MouseEvent.MOUSE_DRAGGED, 0, 0, 0, toY, MouseButton.PRIMARY, 1,
+                false, false, false, false, true, false, false, false, false, false, null));
         pane.layout();
     }
 
