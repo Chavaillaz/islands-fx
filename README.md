@@ -8,6 +8,10 @@
 Light and dark themes for JavaFX applications, and the workbench of their main window: its toolbar standing in the
 title bar, its content and tool windows in rounded islands.
 
+![The main window of an application in the dark theme, its orders in a tool window on the left, the order selected in
+the middle, its properties on the right and a log below, two notifications over the bottom right
+corner](docs/screenshots/workbench-dark.png)
+
 - **Workbench**: the main toolbar standing in the title bar of the window, beside the buttons of the operating system,
   the tool windows docked in rounded islands beside the content, their buttons on stripes along the sides, and the
   status bar with its breadcrumbs. The main menu stands in the menu bar of macOS, and elsewhere in a menu opened by the
@@ -86,6 +90,12 @@ among the tests, from which a clone of the repository opens it:
 ```shell
 mvn -Pshowcase
 ```
+
+![The search of the actions over the main window, in the light theme](docs/screenshots/workbench-light.png)
+
+![The gallery of the controls in the light theme](docs/screenshots/controls-light.png)
+
+![The gallery of the controls in the dark theme](docs/screenshots/controls-dark.png)
 
 ## Usage
 
@@ -341,6 +351,13 @@ Every pull request, and every push to `master`, is built that way on Java 25 and
 support version, with the coverage of the tests measured, and failing once they cover less than 80% of the lines
 or of the branches of the library: `mvn clean -Pcoverage verify` writes the same report to `target/site/jacoco`,
 the `clean` keeping the data of an earlier build out of it.
+
+The screenshots of this page are renders of the showcase on the headless platform of JavaFX, which its test writes
+once given their folder. A change to the look renders them again with:
+
+```shell
+mvn test -Dtest=ShowcaseTest -Dshowcase.screenshots=docs/screenshots
+```
 
 ### Releasing
 
