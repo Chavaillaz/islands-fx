@@ -2,6 +2,7 @@ package com.chavaillaz.fx.islands.theme;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -12,11 +13,15 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Control;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.ListView;
+import javafx.scene.control.Pagination;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.TreeView;
+import javafx.scene.control.skin.DatePickerSkin;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
@@ -80,6 +85,36 @@ class BaseStylesheetTest {
 
         assertThat(List.of(content, toolWindowContent, deeper))
                 .allSatisfy(view -> assertThat(fills(view)).containsOnly(Color.TRANSPARENT));
+    }
+
+    @Test
+    @DisplayName("Pops the calendar of a date picker up as a menu, the day chosen in the accent")
+    void popsCalendarUp() {
+        DatePicker picker = new DatePicker(LocalDate.of(2026, 11, 26));
+        DatePickerSkin skin = new DatePickerSkin(picker);
+        picker.setSkin(skin);
+        Region calendar = (Region) skin.getPopupContent();
+        Scene scene = themed(ThemeMode.DARK, calendar);
+
+        assertThat(fills(calendar)).first().isEqualTo(color(scene, "-popup-border"));
+        assertThat(descendants(calendar).filter(node -> node.getStyleClass().contains("selected")))
+                .singleElement()
+                .satisfies(day -> assertThat(fills((Region) day)).containsExactly(color(scene, "-accent")));
+    }
+
+    @Test
+    @DisplayName("Marks the page shown among the flat buttons of the pages")
+    void marksPageShown() {
+        Pagination pagination = new Pagination(5, 1);
+        Scene scene = themed(ThemeMode.LIGHT, pagination);
+        List<ToggleButton> pages = descendants(pagination)
+                .filter(node -> node.getStyleClass().contains("number-button"))
+                .map(ToggleButton.class::cast)
+                .toList();
+
+        assertThat(pages).hasSize(5);
+        assertThat(fills(pages.get(1))).first().isEqualTo(color(scene, "-tab-selected-border"));
+        assertThat(fills(pages.get(0))).containsOnly(Color.TRANSPARENT);
     }
 
     /**

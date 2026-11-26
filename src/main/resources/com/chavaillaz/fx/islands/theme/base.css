@@ -437,12 +437,16 @@
     -fx-padding: 4px 0 4px 0;
 }
 
-.check-menu-item:checked .mark {
+.check-menu-item:checked > .left-container > .check,
+.radio-menu-item:checked > .left-container > .radio {
     -fx-background-color: -text-default;
 }
 
-.menu > .right-container > .arrow {
+.menu > .right-container > .arrow,
+.menu-up-arrow,
+.menu-down-arrow {
     -fx-background-color: -icon-muted;
+    -fx-effect: null;
 }
 
 .tooltip {
@@ -617,6 +621,117 @@
     -fx-background-color: -selection-active;
 }
 
+/* The calendar of a date picker, and the palette of a color picker, pop up as menus do */
+.date-picker-popup,
+.color-palette {
+    -fx-background-color: -popup-border, -popup-bg;
+    -fx-background-insets: 0, 1px;
+    -fx-background-radius: 8px, 7px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 16, 0, 0, 4);
+}
+
+.date-picker-popup {
+    -fx-padding: 6px;
+    -fx-spacing: 4px;
+}
+
+.date-picker-popup > .month-year-pane {
+    -fx-background-color: transparent;
+    -fx-padding: 0 0 4px 0;
+}
+
+/* The month and the year, between the buttons going back and forth, unframed although made as spinners */
+.date-picker-popup > * > .spinner {
+    -fx-background-color: transparent;
+}
+
+.date-picker-popup > * > .spinner > .label {
+    -fx-font-weight: bold;
+}
+
+.date-picker-popup > * > .spinner > .button {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 4px;
+    -fx-padding: 4px 6px 4px 6px;
+}
+
+.date-picker-popup > * > .spinner > .button:hover {
+    -fx-background-color: -toolbar-hovered;
+}
+
+.date-picker-popup > * > .spinner > .button:armed {
+    -fx-background-color: -toolbar-pressed;
+}
+
+.date-picker-popup > * > .spinner > .button > .left-arrow,
+.date-picker-popup > * > .spinner > .button > .right-arrow {
+    -fx-background-color: -icon-muted;
+    -fx-background-insets: 0;
+    -fx-effect: null;
+}
+
+.date-picker-popup > .month-year-pane > .secondary-label,
+.date-picker-popup > * > .day-cell > .secondary-text {
+    -fx-text-fill: -text-secondary;
+    -fx-fill: -text-secondary;
+}
+
+.date-picker-popup > .calendar-grid {
+    -fx-background-color: transparent;
+    -fx-hgap: 2px;
+    -fx-vgap: 2px;
+}
+
+.date-picker-popup > * > .day-name-cell,
+.date-picker-popup > * > .week-number-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -text-secondary;
+}
+
+.date-picker-popup > * > .day-cell {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 4px;
+    -fx-border-color: transparent;
+    -fx-text-fill: -text-default;
+}
+
+.date-picker-popup > * > .day-cell:hover {
+    -fx-background-color: -toolbar-hovered;
+}
+
+.date-picker-popup > * > .day-cell.previous-month,
+.date-picker-popup > * > .day-cell.next-month,
+.date-picker-popup > * > .day-cell:disabled {
+    -fx-text-fill: -text-disabled;
+}
+
+.date-picker-popup > * > .day-cell.today {
+    -fx-text-fill: -text-link;
+    -fx-font-weight: bold;
+}
+
+.date-picker-popup > * > .day-cell:focused {
+    -fx-background-color: -accent, -popup-bg;
+    -fx-background-insets: 0, 1px;
+    -fx-background-radius: 4px, 3px;
+}
+
+.date-picker-popup > * > .day-cell.selected,
+.date-picker-popup > * > .day-cell.selected:hover,
+.date-picker-popup > * > .day-cell.selected:focused {
+    -fx-background-color: -accent;
+    -fx-background-insets: 0;
+    -fx-text-fill: -text-over-accent;
+}
+
+.color-palette-region > .color-square.hover-square {
+    -fx-background-color: transparent, -popup-bg;
+    -fx-border-color: -accent;
+}
+
 .check-box > .box,
 .radio-button > .radio {
     -fx-background-color: -control-border, -island-bg;
@@ -705,6 +820,41 @@
     -fx-border-color: transparent;
 }
 
+.tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-close-button {
+    -fx-background-color: -icon-muted;
+    -fx-effect: null;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-close-button:hover {
+    -fx-background-color: -icon-default;
+}
+
+/* The buttons listing the tabs, and the items of a toolbar, that do not fit, flat as the buttons of a toolbar */
+.tab-pane > .tab-header-area > .control-buttons-tab > .container > .tab-down-button {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 4px;
+    -fx-padding: 4px;
+}
+
+.tab-pane > .tab-header-area > .control-buttons-tab > .container > .tab-down-button:hover,
+.tool-bar-overflow-button:hover {
+    -fx-background-color: -toolbar-hovered;
+}
+
+.tab-pane > .tab-header-area > .control-buttons-tab > .container > .tab-down-button > .arrow,
+.tool-bar-overflow-button > .arrow,
+.tool-bar-overflow-button:hover > .arrow,
+.tool-bar-overflow-button:focused > .arrow {
+    -fx-background-color: -icon-muted;
+    -fx-background-insets: 0;
+    -fx-effect: null;
+}
+
+.tool-bar-overflow-button {
+    -fx-background-radius: 4px;
+}
+
 .tool-bar {
     -fx-background-color: transparent;
     -fx-padding: 4px 8px 4px 8px;
@@ -785,6 +935,48 @@
     -fx-background-insets: 0, 2px;
     -fx-background-radius: 1em, 1em;
     -fx-padding: 7px;
+}
+
+/* The buttons of the pages, flat as the buttons of a toolbar, the page shown marked as a selected tab */
+.pagination > .pagination-control > .control-box > .number-button,
+.pagination > .pagination-control > .control-box > .left-arrow-button,
+.pagination > .pagination-control > .control-box > .right-arrow-button {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 4px;
+    -fx-padding: 2px 8px 2px 8px;
+}
+
+.pagination > .pagination-control > .control-box > .number-button:hover,
+.pagination > .pagination-control > .control-box > .left-arrow-button:hover,
+.pagination > .pagination-control > .control-box > .right-arrow-button:hover {
+    -fx-background-color: -toolbar-hovered;
+}
+
+.pagination > .pagination-control > .control-box > .number-button:selected {
+    -fx-background-color: -tab-selected-border, -tab-selected-bg;
+    -fx-background-insets: 0, 1px;
+    -fx-background-radius: 4px, 3px;
+}
+
+.pagination > .pagination-control .left-arrow,
+.pagination > .pagination-control .right-arrow {
+    -fx-background-color: -icon-muted;
+    -fx-background-insets: 0;
+}
+
+.pagination > .pagination-control > .control-box > .bullet-button {
+    -fx-background-color: transparent, -control-border;
+    -fx-background-insets: 0, 5px;
+    -fx-background-radius: 0, 1em;
+}
+
+.pagination > .pagination-control > .control-box > .bullet-button:selected {
+    -fx-background-color: transparent, -accent;
+}
+
+.pagination > .pagination-control > .page-information {
+    -fx-text-fill: -text-secondary;
 }
 
 .menu-bar {
