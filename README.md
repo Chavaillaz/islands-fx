@@ -202,6 +202,13 @@ A few controls complete those of JavaFX: a `Badge`, a short text tinted after it
 record, an `EmptyState`, what an area shows while it has nothing to show, with links to the actions filling it, and a
 `SearchField`, a text field between a magnifier and a button clearing it, as the escape key does.
 
+The rows of a table are tinted after the tone of their item, the row under the mouse and the selection still showing
+over the tint:
+
+```java
+orders.setRowFactory(ToneRows.forTable(order -> order.isLate() ? Tone.DANGER : null));
+```
+
 ### FXML
 
 The controls of the library can be declared in FXML, an icon by the name of one of the `Icons`, or with
@@ -277,9 +284,12 @@ The stylesheets of an application can use the colors of the themes, which every 
 
 ```css
 .table-row-cell:invalid {
-    -fx-background-color: -badge-danger-bg;
+    -row-tint: -badge-danger-bg;
 }
 ```
+
+A row is painted with `-row-tint`, which a stylesheet changes rather than its background, so that the row under the
+mouse and the selection still show over it.
 
 ### Languages
 

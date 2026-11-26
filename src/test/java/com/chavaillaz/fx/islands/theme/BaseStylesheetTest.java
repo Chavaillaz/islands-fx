@@ -3,12 +3,14 @@ package com.chavaillaz.fx.islands.theme;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import javafx.application.ColorScheme;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
 import javafx.css.PseudoClass;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -20,6 +22,8 @@ import javafx.scene.control.Control;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Pagination;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
@@ -42,6 +46,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com.chavaillaz.fx.islands.JavaFxExtension;
+import com.chavaillaz.fx.islands.control.Tone;
+import com.chavaillaz.fx.islands.control.ToneRows;
 import com.chavaillaz.fx.islands.control.Validation;
 import com.chavaillaz.fx.islands.icon.Icons;
 import com.chavaillaz.fx.islands.workbench.ToolWindow;
@@ -163,6 +169,36 @@ class BaseStylesheetTest {
         wrong.pseudoClassStateChanged(PseudoClass.getPseudoClass("focused"), true);
         wrong.applyCss();
         assertThat(fills(wrong)).first().isEqualTo(color(scene, "-control-error-border"));
+    }
+
+    @Test
+    @DisplayName("Tints the rows of a table after the tone of their item, under the row hovered and the selection")
+    void tintsRows() {
+        TableView<String> table = new TableView<>(FXCollections.observableArrayList("late", "paid"));
+        table.getColumns().add(new TableColumn<>("Order"));
+        table.setRowFactory(ToneRows.forTable(item -> item.equals("late") ? Tone.DANGER : null));
+        Scene scene = themed(ThemeMode.DARK, table);
+        // The rows took their tone in the last layout, after the styles were applied
+        table.applyCss();
+        List<Region> rows = descendants(table)
+                .filter(node -> node.getStyleClass().contains("table-row-cell"))
+                .map(Region.class::cast)
+                .filter(row -> !((TableRow<?>) row).isEmpty() && row.isVisible())
+                .sorted(Comparator.comparingInt(row -> ((TableRow<?>) row).getIndex()))
+                .toList();
+
+        assertThat(rows).hasSize(2);
+        assertThat(fills(rows.get(0))).containsExactly(color(scene, "-badge-danger-bg"));
+        assertThat(fills(rows.get(1))).containsExactly(color(scene, "-island-bg"));
+
+        rows.get(0).pseudoClassStateChanged(PseudoClass.getPseudoClass("hover"), true);
+        rows.get(0).applyCss();
+        assertThat(fills(rows.get(0)))
+                .containsExactly(color(scene, "-badge-danger-bg"), color(scene, "-selection-hovered"));
+
+        table.getSelectionModel().select(0);
+        rows.get(0).applyCss();
+        assertThat(fills(rows.get(0))).containsExactly(color(scene, "-selection-inactive"));
     }
 
     /**

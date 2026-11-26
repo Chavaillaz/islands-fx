@@ -364,18 +364,46 @@
     -fx-padding: 2.25px 3.5px 2.25px 3.5px;
 }
 
+/* A row is painted with its tint, the one of the island unless tinted after a tone (see ToneRows), under the row
+   hovered and the selection */
 .table-row-cell,
 .tree-table-row-cell {
+    -row-tint: -island-bg;
     -fx-background: -island-bg;
-    -fx-background-color: -island-bg;
+    -fx-background-color: -row-tint;
     -fx-background-insets: 0;
     -fx-cell-size: 24px;
     -fx-padding: 0;
 }
 
+.table-row-cell:neutral,
+.tree-table-row-cell:neutral {
+    -row-tint: -badge-neutral-bg;
+}
+
+.table-row-cell:info,
+.tree-table-row-cell:info {
+    -row-tint: -badge-info-bg;
+}
+
+.table-row-cell:success,
+.tree-table-row-cell:success {
+    -row-tint: -badge-success-bg;
+}
+
+.table-row-cell:warning,
+.tree-table-row-cell:warning {
+    -row-tint: -badge-warning-bg;
+}
+
+.table-row-cell:danger,
+.tree-table-row-cell:danger {
+    -row-tint: -badge-danger-bg;
+}
+
 .table-row-cell:filled:hover,
 .tree-table-row-cell:filled:hover {
-    -fx-background-color: -island-bg, -selection-hovered;
+    -fx-background-color: -row-tint, -selection-hovered;
 }
 
 .table-row-cell:filled:selected,

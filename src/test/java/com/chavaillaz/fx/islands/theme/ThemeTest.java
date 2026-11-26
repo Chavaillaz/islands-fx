@@ -43,9 +43,12 @@ class ThemeTest {
     @MethodSource("themes")
     @DisplayName("Defines every color the base stylesheet names, and no other one")
     void definesEveryColorNamed(Theme theme) throws IOException {
-        Set<String> used = COLOR_USED.matcher(read(Theme.BASE_STYLESHEET)).results()
+        String base = read(Theme.BASE_STYLESHEET);
+        Set<String> used = COLOR_USED.matcher(base).results()
                 .map(match -> match.group())
                 .collect(Collectors.toSet());
+        // The colors the base stylesheet looks up from its own rules, such as the tint of a row
+        COLOR_DEFINED.matcher(base).results().map(match -> match.group(1)).forEach(used::remove);
         Set<String> defined = COLOR_DEFINED.matcher(read(theme.stylesheets().getFirst())).results()
                 .map(match -> match.group(1))
                 .collect(Collectors.toSet());
