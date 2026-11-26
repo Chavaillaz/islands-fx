@@ -26,6 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.chavaillaz.fx.islands.JavaFxExtension;
 import com.chavaillaz.fx.islands.action.Action;
+import com.chavaillaz.fx.islands.action.ActionMenus;
 import com.chavaillaz.fx.islands.icon.Icons;
 
 @ExtendWith(JavaFxExtension.class)
@@ -208,5 +209,45 @@ class WorkbenchTest {
         widget.setTitle("Order Desk");
         assertThat(widget.getChildren()).extracting(node -> ((Label) node).getText()).containsExactly("OD", "Order Desk");
         assertThat(widget.getTitle()).isEqualTo("Order Desk");
+    }
+
+    @Test
+    @DisplayName("Performs the shortcuts of its tool windows and of the actions registered, out of any menu")
+    void performsShortcutsOutOfMenus() {
+        SimpleBooleanProperty refreshed = new SimpleBooleanProperty();
+        KeyCombination showRecords = KeyCombination.keyCombination("Shortcut+1");
+        KeyCombination refresh = KeyCombination.keyCombination("Shortcut+R");
+        ToolWindow records = ToolWindow.builder("records", "Orders", Icons.RECORDS, new StackPane())
+                .accelerator(showRecords)
+                .build();
+        workbench.addToolWindow(records);
+        Scene scene = workbench.createScene(new Stage());
+        workbench.registerActions(
+                Action.builder("test.refresh", "Refresh").accelerator(refresh).handler(() -> refreshed.set(true)).build(),
+                Action.builder("test.again", "Again").accelerator(refresh).handler(() -> { }).build());
+
+        scene.getAccelerators().get(showRecords).run();
+        scene.getAccelerators().get(refresh).run();
+        assertThat(records.isVisible()).isFalse();
+        assertThat(refreshed.get()).isTrue();
+    }
+
+    @Test
+    @DisplayName("Leaves the shortcuts of its main menu to the menu bar of the system, where it has one")
+    void leavesMenuShortcutsToSystem() {
+        Workbench systemWorkbench = new Workbench(true);
+        KeyCombination showRecords = KeyCombination.keyCombination("Shortcut+1");
+        ToolWindow records = ToolWindow.builder("records", "Orders", Icons.RECORDS, new StackPane())
+                .accelerator(showRecords)
+                .build();
+        systemWorkbench.addToolWindow(records);
+        Scene scene = systemWorkbench.createScene(new Stage());
+        assertThat(scene.getAccelerators()).containsKey(showRecords);
+
+        systemWorkbench.setMainMenu(List.of(new Menu("View", null, ActionMenus.createItem(records.getToggleAction()))));
+        systemWorkbench.registerActions(records.getToggleAction(), Action.builder("test.refresh", "Refresh")
+                .accelerator(KeyCombination.keyCombination("Shortcut+R")).handler(() -> { }).build());
+        assertThat(scene.getAccelerators()).doesNotContainKey(showRecords)
+                .containsKey(KeyCombination.keyCombination("Shortcut+R"));
     }
 }

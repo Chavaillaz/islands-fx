@@ -138,6 +138,14 @@ MenuItem item = ActionMenus.createItem(refresh);      // a menu item, with its s
 A toggle action is given the state it shows with `selected(...)`, its handler changing that state: it is shown as a
 check menu item or a toggle button.
 
+The shortcut of an action works wherever the focus stands in the window once the workbench knows the action: those
+of its tool windows and of its main menu, and those the application registers, such as the actions of its own
+toolbars:
+
+```java
+workbench.registerActions(refresh, save);
+```
+
 ### Icons
 
 The icons of the library are the constants of `Icons`. An application adds its own with an enumeration implementing

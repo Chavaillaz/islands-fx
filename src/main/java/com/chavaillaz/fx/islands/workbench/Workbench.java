@@ -2,8 +2,12 @@ package com.chavaillaz.fx.islands.workbench;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 import javafx.css.PseudoClass;
 import javafx.scene.Node;
@@ -22,7 +26,9 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.jspecify.annotations.Nullable;
 
+import com.chavaillaz.fx.islands.action.Action;
 import com.chavaillaz.fx.islands.action.ActionButtons;
 import com.chavaillaz.fx.islands.icon.Icons;
 import com.chavaillaz.fx.islands.internal.Texts;
@@ -35,6 +41,9 @@ import com.chavaillaz.fx.islands.internal.Texts;
  * The workbench is the scene of its window ({@link #createScene(Stage)}), its main toolbar standing in the title bar.
  * Its main menu stands in the menu bar of macOS, and elsewhere in a menu opened by the first button of the main
  * toolbar.
+ * <p>
+ * The workbench knows the actions it shows, those of its tool windows and of its main menu, and those the application
+ * {@link #registerActions(Action...) registers}: their shortcuts work wherever the focus stands in the window.
  * <p>
  * It carries the style class {@code workbench}, the island of the content {@code content-island}, and those of the
  * tool windows {@code tool-window}. The islands carry the pseudo-classes {@code :left-stripe} and
@@ -56,6 +65,9 @@ public final class Workbench {
     private final ToolWindowStripe leftStripe = new ToolWindowStripe(ToolWindowAnchor.LEFT);
     private final ToolWindowStripe rightStripe = new ToolWindowStripe(ToolWindowAnchor.RIGHT);
     private final List<ToolWindow> toolWindows = new ArrayList<>();
+    private final List<Action> actions = new ArrayList<>();
+    private final Map<KeyCombination, Runnable> shortcuts = new LinkedHashMap<>();
+    private final Set<KeyCombination> systemMenuShortcuts = new HashSet<>();
 
     /**
      * Creates a workbench without content nor tool window yet, its main menu standing in the menu bar of the system
@@ -82,6 +94,11 @@ public final class Workbench {
         layout.setBottom(statusBar.getNode());
         leftStripe.visibleProperty().subscribe(shown -> islands.pseudoClassStateChanged(LEFT_STRIPE, shown));
         rightStripe.visibleProperty().subscribe(shown -> islands.pseudoClassStateChanged(RIGHT_STRIPE, shown));
+        root.sceneProperty().subscribe(scene -> {
+            if (scene != null) {
+                scene.getAccelerators().putAll(shortcuts);
+            }
+        });
     }
 
     /**
@@ -132,6 +149,8 @@ public final class Workbench {
             throw new IllegalArgumentException("A tool window named " + toolWindow.getId() + " is already docked");
         }
         toolWindows.add(toolWindow);
+        registerActions(toolWindow.getToggleAction());
+        toolWindow.getActions().forEach(this::registerActions);
         islands.dock(toolWindow, createIsland(toolWindow));
         (toolWindow.getAnchor() == ToolWindowAnchor.LEFT ? leftStripe : rightStripe).add(toolWindow);
     }
@@ -143,6 +162,22 @@ public final class Workbench {
      */
     public List<ToolWindow> getToolWindows() {
         return Collections.unmodifiableList(toolWindows);
+    }
+
+    /**
+     * Registers actions the workbench does not show by itself, such as those of the toolbars and the headers of the
+     * application: their shortcuts work wherever the focus stands in the window. An action registered already, and a
+     * shortcut the workbench knows already, are left as they are.
+     *
+     * @param actions the actions
+     */
+    public void registerActions(Action... actions) {
+        for (Action action : actions) {
+            if (!this.actions.contains(action)) {
+                this.actions.add(action);
+                addShortcut(action.getAccelerator(), action::perform);
+            }
+        }
     }
 
     /**
@@ -163,6 +198,7 @@ public final class Workbench {
      * @param menus the menus, in the order of the menu bar
      */
     public void setMainMenu(List<Menu> menus) {
+        addMenuShortcuts(menus);
         if (systemMenuBar) {
             MenuBar menuBar = new MenuBar();
             menuBar.getMenus().setAll(menus);
@@ -176,11 +212,6 @@ public final class Workbench {
             mainToolbar.getLeftItems().addFirst(
                     ActionButtons.createMenuButton(Texts.get("workbench.mainMenu"), Icons.MENU, menu,
                             MainToolbar.ICON_SIZE));
-            root.sceneProperty().subscribe(scene -> {
-                if (scene != null) {
-                    registerAccelerators(scene, menus);
-                }
-            });
         }
     }
 
@@ -200,13 +231,39 @@ public final class Workbench {
         return scene;
     }
 
-    private static void registerAccelerators(Scene scene, List<? extends MenuItem> items) {
+    /**
+     * Makes the shortcuts of the items of menus known: handled by the menu bar of the system where the main menu
+     * stands in it, otherwise firing the item from the scene, whatever action held the shortcut.
+     */
+    private void addMenuShortcuts(List<? extends MenuItem> items) {
         for (MenuItem item : items) {
             if (item instanceof Menu menu) {
-                registerAccelerators(scene, menu.getItems());
+                addMenuShortcuts(menu.getItems());
+            } else if (item.getAccelerator() instanceof KeyCombination accelerator && systemMenuBar) {
+                systemMenuShortcuts.add(accelerator);
+                removeShortcut(accelerator);
             } else if (item.getAccelerator() instanceof KeyCombination accelerator) {
-                scene.getAccelerators().put(accelerator, item::fire);
+                removeShortcut(accelerator);
+                addShortcut(accelerator, item::fire);
             }
+        }
+    }
+
+    private void addShortcut(@Nullable KeyCombination accelerator, Runnable runnable) {
+        if (accelerator != null && !systemMenuShortcuts.contains(accelerator) && !shortcuts.containsKey(accelerator)) {
+            shortcuts.put(accelerator, runnable);
+            Scene scene = root.getScene();
+            if (scene != null) {
+                scene.getAccelerators().put(accelerator, runnable);
+            }
+        }
+    }
+
+    private void removeShortcut(KeyCombination accelerator) {
+        Runnable runnable = shortcuts.remove(accelerator);
+        Scene scene = root.getScene();
+        if (runnable != null && scene != null) {
+            scene.getAccelerators().remove(accelerator, runnable);
         }
     }
 
