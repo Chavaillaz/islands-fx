@@ -13,13 +13,17 @@ the middle, its properties on the right and a log below, two notifications over 
 corner](docs/screenshots/workbench-dark.png)
 
 - **Workbench**: the main toolbar standing in the title bar of the window, beside the buttons of the operating system,
-  the tool windows docked in rounded islands beside the content, their buttons on stripes along the sides, and the
-  status bar with its breadcrumbs. The main menu stands in the menu bar of macOS, and elsewhere in a menu opened by the
-  first button of the main toolbar.
+  the tool windows docked in rounded islands beside the content or under it, their buttons on stripes along the sides,
+  and the status bar with its breadcrumbs. The main menu stands in the menu bar of macOS, and elsewhere in a menu
+  opened by the first button of the main toolbar. Notifications show over the window, a search finds any action, and
+  the window opens as the user left it.
 - **Themes**: a light and a dark one, or the one following the appearance of the operating system, applied to every
-  window of the application, its dialogs included, with the standard controls of JavaFX styled flat to match.
+  window of the application, its dialogs included, with the standard controls of JavaFX styled flat to match. An
+  application derives its own from them, and chooses their accent color.
 - **Actions**: what the user can do, described once and shown as menu items, toolbar buttons or tool window buttons
-  that follow whether it is enabled or selected.
+  that follow whether it is enabled or selected, its shortcut working wherever the focus stands in the window.
+- **Controls**: a badge, an empty state and a search field, the rows of tables tinted after a tone, the inputs failing
+  validation marked, and style classes for the texts.
 - **Icons**: outlines drawn on a grid of 16 pixels and colored by the theme, to which an application adds its own.
 
 It is not a framework: an application keeps its own structure, controllers and FXML, and builds its main window from
