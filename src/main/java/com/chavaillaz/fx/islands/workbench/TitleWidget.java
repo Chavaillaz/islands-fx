@@ -4,6 +4,9 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
+import javafx.beans.NamedArg;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.HeaderBar;
@@ -13,23 +16,65 @@ import javafx.scene.layout.HeaderDragType;
  * The title of the window in the main toolbar: a badge of the initials of the title, then the title. Dragging it
  * moves the window, as dragging a title bar does.
  * <p>
- * It carries the style class {@code title-widget}, its badge {@code title-badge} and its title {@code title-name}.
+ * It carries the style class {@code title-widget}, its badge {@code title-badge} and its title {@code title-name}. An
+ * FXML file declares it as {@code <TitleWidget title="Record Explorer"/>}.
  */
 public final class TitleWidget extends HBox {
+
+    private final StringProperty title = new SimpleStringProperty(this, "title", "");
+
+    /**
+     * Creates the widget of no title yet.
+     */
+    public TitleWidget() {
+        Label badge = new Label();
+        badge.getStyleClass().add("title-badge");
+        badge.textProperty().bind(title.map(TitleWidget::initials));
+        badge.visibleProperty().bind(title.isNotEmpty());
+        badge.managedProperty().bind(badge.visibleProperty());
+        Label name = new Label();
+        name.getStyleClass().add("title-name");
+        name.textProperty().bind(title);
+        getChildren().addAll(badge, name);
+        getStyleClass().add("title-widget");
+        HeaderBar.setDragType(this, HeaderDragType.DRAGGABLE_SUBTREE);
+    }
 
     /**
      * Creates the widget of a title.
      *
      * @param title the title, such as the name of the application
      */
-    public TitleWidget(String title) {
-        Label badge = new Label(initials(title));
-        badge.getStyleClass().add("title-badge");
-        Label name = new Label(title);
-        name.getStyleClass().add("title-name");
-        getChildren().addAll(badge, name);
-        getStyleClass().add("title-widget");
-        HeaderBar.setDragType(this, HeaderDragType.DRAGGABLE_SUBTREE);
+    public TitleWidget(@NamedArg("title") String title) {
+        this();
+        setTitle(title);
+    }
+
+    /**
+     * Gives the title the widget shows, after the badge of its initials.
+     *
+     * @return the property of the title, empty for none
+     */
+    public StringProperty titleProperty() {
+        return title;
+    }
+
+    /**
+     * Gives the title the widget shows.
+     *
+     * @return the title, empty for none
+     */
+    public String getTitle() {
+        return title.get();
+    }
+
+    /**
+     * Changes the title the widget shows.
+     *
+     * @param title the title, such as the name of the application
+     */
+    public void setTitle(String title) {
+        this.title.set(title);
     }
 
     /**

@@ -61,12 +61,48 @@ public final class EmptyState extends VBox {
     }
 
     /**
+     * Gives the title.
+     *
+     * @return the title, empty for none
+     */
+    public String getTitle() {
+        return title.getText();
+    }
+
+    /**
+     * Changes the title.
+     *
+     * @param title the title, empty for none
+     */
+    public void setTitle(String title) {
+        this.title.setText(title);
+    }
+
+    /**
      * Gives the text under the title, telling what would fill the area.
      *
      * @return the property of the text, empty for none
      */
     public StringProperty textProperty() {
         return text.textProperty();
+    }
+
+    /**
+     * Gives the text under the title.
+     *
+     * @return the text, empty for none
+     */
+    public String getText() {
+        return text.getText();
+    }
+
+    /**
+     * Changes the text under the title.
+     *
+     * @param text the text, empty for none
+     */
+    public void setText(String text) {
+        this.text.setText(text);
     }
 
     /**

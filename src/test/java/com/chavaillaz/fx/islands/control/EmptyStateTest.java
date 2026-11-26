@@ -26,7 +26,8 @@ class EmptyStateTest {
 
         assertThat(emptyState.getChildren()).noneMatch(Node::isManaged);
 
-        emptyState.titleProperty().set("No record selected");
+        emptyState.setTitle("No record selected");
+        assertThat(emptyState.getTitle()).isEqualTo("No record selected");
         assertThat(emptyState.getChildren()).filteredOn(Node::isManaged)
                 .singleElement()
                 .isInstanceOfSatisfying(Label.class,
@@ -39,7 +40,8 @@ class EmptyStateTest {
         SimpleBooleanProperty performed = new SimpleBooleanProperty();
         KeyCombination accelerator = KeyCombination.keyCombination("Shortcut+R");
         EmptyState emptyState = new EmptyState();
-        emptyState.textProperty().set("Select a record");
+        emptyState.setText("Select a record");
+        assertThat(emptyState.getText()).isEqualTo("Select a record");
         emptyState.getActions().addAll(
                 Action.builder("test.refresh", "Refresh").accelerator(accelerator)
                         .handler(() -> performed.set(true)).build(),

@@ -10,6 +10,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -102,5 +103,25 @@ class ActionButtonsTest {
         } finally {
             stage.hide();
         }
+    }
+
+    @Test
+    @DisplayName("Makes a button of the application look as the buttons of actions, its text moving to its tooltip")
+    void decoratesButtonOfApplication() {
+        Button button = new Button("Save");
+        ActionButtons.decorate(button, Icons.SAVE);
+
+        assertThat(button.getStyleClass()).containsExactly("action-button");
+        assertThat(button.getText()).isNull();
+        assertThat(button.getTooltip().getText()).isEqualTo("Save");
+        assertThat(button.getAccessibleText()).isEqualTo("Save");
+        assertThat(button.getGraphic()).isInstanceOfSatisfying(IconView.class,
+                icon -> assertThat(icon.getIcon()).isEqualTo(Icons.SAVE));
+        assertThat(button.isFocusTraversable()).isFalse();
+
+        Button withTooltip = new Button("Open");
+        withTooltip.setTooltip(new Tooltip("Opens a file"));
+        ActionButtons.decorate(withTooltip, Icons.OPEN);
+        assertThat(withTooltip.getTooltip().getText()).isEqualTo("Opens a file");
     }
 }

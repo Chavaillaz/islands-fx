@@ -203,5 +203,10 @@ class WorkbenchTest {
         assertThat(TitleWidget.initials("explorer")).isEqualTo("EX");
         assertThat(TitleWidget.initials(" x ")).isEqualTo("X");
         assertThat(new TitleWidget("Record Explorer").getStyleClass()).contains("title-widget");
+
+        TitleWidget widget = new TitleWidget();
+        widget.setTitle("Order Desk");
+        assertThat(widget.getChildren()).extracting(node -> ((Label) node).getText()).containsExactly("OD", "Order Desk");
+        assertThat(widget.getTitle()).isEqualTo("Order Desk");
     }
 }

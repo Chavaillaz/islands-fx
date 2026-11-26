@@ -95,6 +95,31 @@ public final class ActionButtons {
         return button;
     }
 
+    /**
+     * Makes a button the application created, such as one an FXML file declares, look as the buttons of actions:
+     * borderless, showing an icon, leaving the focus where the user works. Its text, if any, moves to its tooltip,
+     * unless it has one, and stands for it in the screen readers.
+     *
+     * @param button the button
+     * @param icon   the icon it shows
+     */
+    public static void decorate(ButtonBase button, Icon icon) {
+        String text = button.getText();
+        if (text != null && !text.isEmpty()) {
+            if (button.getTooltip() == null) {
+                button.setTooltip(new Tooltip(text));
+            }
+            if (button.getAccessibleText() == null) {
+                button.setAccessibleText(text);
+            }
+            button.setText(null);
+        }
+        button.getStyleClass().setAll("action-button");
+        button.setGraphic(new IconView(icon));
+        button.setMnemonicParsing(false);
+        button.setFocusTraversable(false);
+    }
+
     private static void configure(ButtonBase button, String text, @Nullable Icon icon, String tooltip,
                                   double iconSize) {
         button.getStyleClass().setAll("action-button");

@@ -34,4 +34,15 @@ public interface Icon {
     default String styleClass() {
         return "icon-" + name().toLowerCase(Locale.ROOT).replace('_', '-');
     }
+
+    /**
+     * Gives the icon of the library of a name, through which an FXML file names an icon, as {@code icon="SAVE"}.
+     *
+     * @param name the name of one of the {@link Icons}
+     * @return the icon
+     * @throws IllegalArgumentException when the library has no icon of that name
+     */
+    static Icon valueOf(String name) {
+        return Icons.valueOf(name);
+    }
 }

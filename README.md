@@ -150,6 +150,25 @@ public enum AppIcons implements Icon {
 An icon is stroked in the color of `-icon-default`, which its style class, `icon-` followed by its name in lowercase
 (`icon-history`), can change.
 
+### FXML
+
+The controls of the library can be declared in FXML, an icon by the name of one of the `Icons`, or with
+`fx:constant` for one of the application:
+
+```xml
+<TitleWidget title="Record Explorer"/>
+<IconView icon="SAVE" size="20"/>
+<Badge text="Paid" tone="SUCCESS"/>
+<EmptyState title="No record selected" text="Select a record to see its details here"/>
+<Button fx:id="saveButton" text="Save"/>
+```
+
+A button an FXML file declares looks as the buttons of actions once decorated, its text moving to its tooltip:
+
+```java
+ActionButtons.decorate(saveButton, Icons.SAVE);
+```
+
 ### Validation
 
 An input the user filled in wrong is marked by `Validation`: its outline takes the color of the problem, stronger

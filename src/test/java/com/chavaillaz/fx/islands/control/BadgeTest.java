@@ -2,6 +2,7 @@ package com.chavaillaz.fx.islands.control;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import javafx.beans.property.SimpleObjectProperty;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,5 +27,17 @@ class BadgeTest {
         assertThat(badge.getTone()).isEqualTo(Tone.SUCCESS);
         assertThat(badge.getPseudoClassStates()).containsExactly(Tone.SUCCESS.pseudoClass());
         assertThat(Tone.SUCCESS.pseudoClass().getPseudoClassName()).isEqualTo("success");
+    }
+
+    @Test
+    @DisplayName("Follows the tone it is bound to")
+    void followsBoundTone() {
+        SimpleObjectProperty<Tone> status = new SimpleObjectProperty<>(Tone.WARNING);
+        Badge badge = new Badge();
+        badge.toneProperty().bind(status);
+        assertThat(badge.getPseudoClassStates()).containsExactly(Tone.WARNING.pseudoClass());
+
+        status.set(Tone.DANGER);
+        assertThat(badge.getPseudoClassStates()).containsExactly(Tone.DANGER.pseudoClass());
     }
 }

@@ -1,6 +1,7 @@
 package com.chavaillaz.fx.islands.icon;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 import javafx.geometry.Bounds;
 import javafx.scene.shape.SVGPath;
@@ -49,5 +50,29 @@ class IconTest {
                 .satisfies(shape -> assertThat(shape.getBoundsInParent().getMaxX()).isLessThanOrEqualTo(20));
         assertThat(view.isMouseTransparent()).isTrue();
         assertThat(new IconView(Icons.HIDE).getPrefWidth()).isEqualTo(IconView.GRID);
+    }
+
+    @Test
+    @DisplayName("Changes the icon it shows, along with its style class")
+    void changesIconShown() {
+        IconView view = new IconView();
+        assertThat(view.getIcon()).isNull();
+        assertThat(view.getStyleClass()).containsExactly("icon");
+
+        view.setIcon(Icons.SAVE);
+        view.setIcon(Icons.OPEN);
+        view.setSize(24);
+
+        assertThat(view.getStyleClass()).containsExactly("icon", "icon-open");
+        assertThat(((SVGPath) view.getChildrenUnmodifiable().getFirst()).getContent()).isEqualTo(Icons.OPEN.path());
+        assertThat(view.getSize()).isEqualTo(24);
+        assertThat(view.getMaxHeight()).isEqualTo(24);
+    }
+
+    @Test
+    @DisplayName("Names the icons of the library as FXML names them")
+    void namesIconsOfLibrary() {
+        assertThat(Icon.valueOf("SAVE")).isEqualTo(Icons.SAVE);
+        assertThatIllegalArgumentException().isThrownBy(() -> Icon.valueOf("UNKNOWN"));
     }
 }
