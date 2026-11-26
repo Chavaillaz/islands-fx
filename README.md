@@ -120,6 +120,16 @@ workbench.getStatusBar().getWidgets().add(loading);
 loading.follow(loadTask);
 ```
 
+The workbench shows notifications in balloons over the bottom right corner of the window: they go away by
+themselves, or stay until closed for a warning or a danger, and offer links to their actions:
+
+```java
+workbench.showNotification(Notification.builder(Tone.DANGER, "Could not load the records")
+        .text(exception.getMessage())
+        .actions(retry)
+        .build());
+```
+
 ### Actions
 
 ```java

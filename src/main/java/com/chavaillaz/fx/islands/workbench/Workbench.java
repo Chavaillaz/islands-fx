@@ -31,6 +31,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Subscription;
 import org.jspecify.annotations.Nullable;
 
 import com.chavaillaz.fx.islands.action.Action;
@@ -76,6 +77,7 @@ public final class Workbench {
     private final List<ActionSearch.Entry> menuEntries = new ArrayList<>();
     private final Map<KeyCombination, Runnable> shortcuts = new LinkedHashMap<>();
     private final Set<KeyCombination> systemMenuShortcuts = new HashSet<>();
+    private final NotificationLayer notifications = new NotificationLayer();
     private final ActionSearch search = new ActionSearch(this::searchEntries);
     private final Action searchAction = Action.builder("workbench.searchActions", Texts.get("search.action"))
             .icon(Icons.SEARCH)
@@ -99,7 +101,7 @@ public final class Workbench {
     Workbench(boolean systemMenuBar) {
         this.systemMenuBar = systemMenuBar;
         root.getStyleClass().add("workbench");
-        root.getChildren().addAll(layout, search);
+        root.getChildren().addAll(layout, notifications, search);
         content.getStyleClass().add("content-island");
         layout.setTop(mainToolbar.getNode());
         layout.setLeft(leftStripe);
@@ -196,6 +198,17 @@ public final class Workbench {
     }
 
     /**
+     * Shows a notification in a balloon over the bottom right corner of the window, under the notifications showing,
+     * until it goes away by itself or is closed.
+     *
+     * @param notification the notification
+     * @return the subscription, which closes the notification once unsubscribed
+     */
+    public Subscription showNotification(Notification notification) {
+        return notifications.show(notification);
+    }
+
+    /**
      * Gives the action opening the search of the actions, whose shortcut is {@code Shortcut+Shift+A}: a field over the
      * window, listing the actions the workbench knows whose text, menu or description holds the words typed, and
      * performing the one chosen. An application can show it in a menu or a toolbar as well.
@@ -269,6 +282,13 @@ public final class Workbench {
         actions.forEach(action -> entries.putIfAbsent(action, new ActionSearch.Entry(action, "")));
         entries.remove(searchAction);
         return List.copyOf(entries.values());
+    }
+
+    /**
+     * Gives the layer of the notifications, for the tests to look into.
+     */
+    NotificationLayer getNotifications() {
+        return notifications;
     }
 
     /**

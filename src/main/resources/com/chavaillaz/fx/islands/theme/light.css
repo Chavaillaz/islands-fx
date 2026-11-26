@@ -3,7 +3,7 @@
  * Every theme defines the same colors, under the same names.
  */
 .root {
-    /* Surfaces: the window behind the islands, the islands, and what pops up over them */
+    /* Surfaces: the window behind the islands, the islands, what pops up over them, and the notifications */
     -main-window-bg: #E9EAEE;
     -island-bg: #FFFFFF;
     -island-border: #EBECF0;
@@ -12,6 +12,8 @@
     -popup-border: #D1D3D9;
     -tooltip-bg: #FFFFFF;
     -tooltip-border: #D1D3D9;
+    -notification-bg: #FFFFFF;
+    -notification-border: #D1D3D9;
 
     /* Text */
     -text-default: #000000;

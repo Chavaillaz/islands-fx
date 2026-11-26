@@ -201,6 +201,55 @@
     -fx-text-fill: -text-secondary;
 }
 
+/* The notifications, stacked over the bottom right corner of the window, above the status bar */
+.notification-layer {
+    -fx-padding: 0 12px 38px 12px;
+    -fx-spacing: 8px;
+}
+
+.notification {
+    -fx-background-color: -notification-border, -notification-bg;
+    -fx-background-insets: 0, 1px;
+    -fx-background-radius: 8px, 7px;
+    -fx-padding: 10px 8px 12px 12px;
+    -fx-spacing: 6px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 16, 0, 0, 4);
+}
+
+.notification-title {
+    -fx-font-weight: bold;
+}
+
+.notification-actions {
+    -fx-hgap: 12px;
+    -fx-vgap: 4px;
+    -fx-padding: 2px 0 0 24px;
+}
+
+.notification-text {
+    -fx-padding: 0 0 0 24px;
+}
+
+.notification:neutral .notification-icon .icon-shape {
+    -fx-stroke: -icon-muted;
+}
+
+.notification:info .notification-icon .icon-shape {
+    -fx-stroke: -icon-blue;
+}
+
+.notification:success .notification-icon .icon-shape {
+    -fx-stroke: -badge-success-text;
+}
+
+.notification:warning .notification-icon .icon-shape {
+    -fx-stroke: -icon-orange;
+}
+
+.notification:danger .notification-icon .icon-shape {
+    -fx-stroke: -text-error;
+}
+
 /* ------------------------------------------------------------------------------------------- Action buttons */
 
 .action-button {
