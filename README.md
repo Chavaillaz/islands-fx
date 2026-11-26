@@ -51,12 +51,15 @@ The dependency is available in Maven Central, along with JavaFX, which the appli
 </dependency>
 ```
 
-On the module path, the library is the module `com.chavaillaz.fx.islands`, which requires JavaFX and the JSpecify API
-transitively:
+On the module path, the library is the module `com.chavaillaz.fx.islands`, which requires JavaFX, the preferences API
+of Java (`java.prefs`) and the JSpecify API transitively:
 
 ```java
 requires com.chavaillaz.fx.islands;
 ```
+
+The module of JSpecify is then needed at run time as well, which the dependency brings: an application declaring
+JSpecify itself keeps it in the `compile` scope, the `provided` one leaving it out of the run, which then fails.
 
 ### Snapshots
 
