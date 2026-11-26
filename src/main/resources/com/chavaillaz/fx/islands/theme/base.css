@@ -459,6 +459,15 @@
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0, 0, 2);
 }
 
+/* The tooltip telling why an input failed validation, tinted after the problem */
+.tooltip.validation-tooltip.error {
+    -fx-background-color: -feedback-error-border, -feedback-error-bg;
+}
+
+.tooltip.validation-tooltip.warning {
+    -fx-background-color: -feedback-warning-border, -feedback-warning-bg;
+}
+
 /* ------------------------------------------------------------------------------------------ Other controls */
 
 .button,
@@ -573,6 +582,39 @@
 .menu-button:focus-visible,
 .split-menu-button:focus-visible {
     -fx-background-color: -accent, -island-bg;
+    -fx-background-insets: -1px, 1px;
+}
+
+/* An input failing validation is outlined in the color of the problem, stronger while focused (see Validation) */
+.text-input:error,
+.combo-box-base:error,
+.choice-box:error,
+.spinner:error {
+    -fx-background-color: -control-error-border-inactive, -island-bg;
+    -fx-background-insets: 0, 1px;
+}
+
+.text-input:warning,
+.combo-box-base:warning,
+.choice-box:warning,
+.spinner:warning {
+    -fx-background-color: -control-warning-border-inactive, -island-bg;
+    -fx-background-insets: 0, 1px;
+}
+
+.text-input:error:focused,
+.combo-box-base:error:focused,
+.choice-box:error:focused,
+.spinner:error:focused {
+    -fx-background-color: -control-error-border, -island-bg;
+    -fx-background-insets: -1px, 1px;
+}
+
+.text-input:warning:focused,
+.combo-box-base:warning:focused,
+.choice-box:warning:focused,
+.spinner:warning:focused {
+    -fx-background-color: -control-warning-border, -island-bg;
     -fx-background-insets: -1px, 1px;
 }
 

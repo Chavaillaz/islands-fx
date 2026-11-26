@@ -42,6 +42,16 @@
     -icon-orange: #E08855;
     -icon-purple: #A571E6;
 
+    /* Validation: the outline of an input failing it, stronger while focused, and the tooltip telling why */
+    -control-error-border: #C54E58;
+    -control-error-border-inactive: #6D3136;
+    -control-warning-border: #A56906;
+    -control-warning-border-inactive: #583E21;
+    -feedback-error-bg: #56272B;
+    -feedback-error-border: #80383E;
+    -feedback-warning-bg: #44321D;
+    -feedback-warning-border: #694820;
+
     /* Badges, after the feedback colors */
     -badge-neutral-text: #9FA2A8;
     -badge-neutral-bg: #33353B;

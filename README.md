@@ -150,6 +150,24 @@ public enum AppIcons implements Icon {
 An icon is stroked in the color of `-icon-default`, which its style class, `icon-` followed by its name in lowercase
 (`icon-history`), can change.
 
+### Validation
+
+An input the user filled in wrong is marked by `Validation`: its outline takes the color of the problem, stronger
+while it has the focus, and its tooltip tells the problem, until the mark is cleared:
+
+```java
+name.textProperty().subscribe(text -> {
+    if (text.isBlank()) {
+        Validation.setError(name, "The name is required");
+    } else {
+        Validation.clear(name);
+    }
+});
+```
+
+A warning (`setWarning`) marks a value that is doubtful rather than wrong. The marks are the pseudo-classes `:error`
+and `:warning`, which the stylesheets of an application can use as well.
+
 ### Colors
 
 The stylesheets of an application can use the colors of the themes, which every theme defines under the same names:
@@ -162,6 +180,7 @@ The stylesheets of an application can use the colors of the themes, which every 
 | `-accent`, `-selection-active`, `-selection-inactive`           | the accent, the selection of a focused list or not   |
 | `-icon-default`, `-icon-muted`, `-icon-blue`, `-icon-orange`    | the strokes of icons                                 |
 | `-badge-success-bg`, `-badge-danger-bg`, and their `-text`      | the tints of badges, such as the rows of a status    |
+| `-control-error-border`, `-control-warning-border`              | the outline of an input failing validation           |
 
 ```css
 .table-row-cell:invalid {

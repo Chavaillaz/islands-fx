@@ -9,11 +9,13 @@ import java.util.stream.Stream;
 
 import javafx.application.ColorScheme;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.css.PseudoClass;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.TraversalDirection;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.ListView;
@@ -40,6 +42,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com.chavaillaz.fx.islands.JavaFxExtension;
+import com.chavaillaz.fx.islands.control.Validation;
 import com.chavaillaz.fx.islands.icon.Icons;
 import com.chavaillaz.fx.islands.workbench.ToolWindow;
 import com.chavaillaz.fx.islands.workbench.Workbench;
@@ -142,6 +145,24 @@ class BaseStylesheetTest {
         } finally {
             stage.hide();
         }
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @EnumSource(value = ThemeMode.class, names = {"LIGHT", "DARK"})
+    @DisplayName("Outlines an input failing validation in the color of the problem, stronger while focused")
+    void outlinesInvalidInputs(ThemeMode mode) {
+        TextField wrong = new TextField();
+        Validation.setError(wrong, "Wrong");
+        ComboBox<String> doubtful = new ComboBox<>();
+        Validation.setWarning(doubtful, "Doubtful");
+        Scene scene = themed(mode, wrong, doubtful);
+
+        assertThat(fills(wrong)).first().isEqualTo(color(scene, "-control-error-border-inactive"));
+        assertThat(fills(doubtful)).first().isEqualTo(color(scene, "-control-warning-border-inactive"));
+
+        wrong.pseudoClassStateChanged(PseudoClass.getPseudoClass("focused"), true);
+        wrong.applyCss();
+        assertThat(fills(wrong)).first().isEqualTo(color(scene, "-control-error-border"));
     }
 
     /**
