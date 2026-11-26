@@ -12,6 +12,8 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.TraversalDirection;
+import javafx.scene.control.Button;
 import javafx.scene.control.Control;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.ListView;
@@ -29,6 +31,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -115,6 +118,30 @@ class BaseStylesheetTest {
         assertThat(pages).hasSize(5);
         assertThat(fills(pages.get(1))).first().isEqualTo(color(scene, "-tab-selected-border"));
         assertThat(fills(pages.get(0))).containsOnly(Color.TRANSPARENT);
+    }
+
+    @Test
+    @DisplayName("Rings the focus of a button when it comes from the keyboard, not from a click")
+    void ringsKeyboardFocus() {
+        Button first = new Button("First");
+        Button second = new Button("Second");
+        Scene scene = themed(ThemeMode.DARK, first, second);
+        Stage stage = new Stage();
+        stage.setScene(scene);
+        stage.show();
+        try {
+            first.requestFocus();
+            scene.getRoot().applyCss();
+            assertThat(first.isFocused()).isTrue();
+            assertThat(fills(first)).first().isEqualTo(color(scene, "-control-border"));
+
+            first.requestFocusTraversal(TraversalDirection.NEXT);
+            scene.getRoot().applyCss();
+            assertThat(second.isFocusVisible()).isTrue();
+            assertThat(fills(second)).first().isEqualTo(color(scene, "-accent"));
+        } finally {
+            stage.hide();
+        }
     }
 
     /**

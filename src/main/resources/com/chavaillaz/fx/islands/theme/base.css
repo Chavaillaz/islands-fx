@@ -487,8 +487,9 @@
     -fx-background-insets: 0, 1px;
 }
 
-.button:focused,
-.toggle-button:focused {
+/* The focus is ringed when it comes from the keyboard, a click telling well enough where it went */
+.button:focus-visible,
+.toggle-button:focus-visible {
     -fx-background-color: -accent, -island-bg;
     -fx-background-insets: -1px, 1px;
 }
@@ -501,6 +502,12 @@
 
 .button:default:hover {
     -fx-background-color: derive(-accent, -8%);
+}
+
+.button:default:focus-visible {
+    -fx-background-color: -accent, -island-bg, -accent;
+    -fx-background-insets: -2px, -1px, 0;
+    -fx-background-radius: 6px, 5px, 4px;
 }
 
 /* The prompt is given its color here rather than on the root: Modena colors it on the field itself, darker than the
@@ -558,11 +565,13 @@
     -fx-background-insets: 0, 1px, 1px;
 }
 
-.combo-box-base:focused,
-.choice-box:focused,
-.menu-button:focused,
-.split-menu-button:focused,
-.spinner:focused {
+/* Ringed while focused when the user types in them, as a text field is, otherwise as a button is */
+.combo-box-base:editable:focused,
+.spinner:focused,
+.combo-box-base:focus-visible,
+.choice-box:focus-visible,
+.menu-button:focus-visible,
+.split-menu-button:focus-visible {
     -fx-background-color: -accent, -island-bg;
     -fx-background-insets: -1px, 1px;
 }
@@ -746,8 +755,8 @@
     -fx-background-radius: 1em, 1em;
 }
 
-.check-box:focused > .box,
-.radio-button:focused > .radio {
+.check-box:focus-visible > .box,
+.radio-button:focus-visible > .radio {
     -fx-background-color: -accent, -island-bg;
 }
 
@@ -762,6 +771,23 @@
 .check-box:indeterminate > .box > .mark,
 .radio-button:selected > .radio > .dot {
     -fx-background-color: -text-over-accent;
+}
+
+/* A box filled with the accent is ringed around */
+.check-box:selected:focus-visible > .box,
+.check-box:indeterminate:focus-visible > .box,
+.radio-button:selected:focus-visible > .radio {
+    -fx-background-color: -accent, -island-bg, -accent;
+    -fx-background-insets: -2px, -1px, 0;
+}
+
+.check-box:selected:focus-visible > .box,
+.check-box:indeterminate:focus-visible > .box {
+    -fx-background-radius: 5px, 4px, 3px;
+}
+
+.radio-button:selected:focus-visible > .radio {
+    -fx-background-radius: 1em, 1em, 1em;
 }
 
 .list-cell,
@@ -810,6 +836,10 @@
     -fx-background-color: -tab-selected-border, -tab-selected-bg;
     -fx-background-insets: 0, 1px;
     -fx-background-radius: 6px, 5px;
+}
+
+.tab-pane:focus-visible > .tab-header-area > .headers-region > .tab:selected {
+    -fx-background-color: -accent, -tab-selected-bg;
 }
 
 .tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-label {
@@ -935,6 +965,12 @@
     -fx-background-insets: 0, 2px;
     -fx-background-radius: 1em, 1em;
     -fx-padding: 7px;
+}
+
+.slider:focus-visible > .thumb {
+    -fx-background-color: -tab-selected-border, -accent, -island-bg;
+    -fx-background-insets: -3px, 0, 2px;
+    -fx-background-radius: 1em, 1em, 1em;
 }
 
 /* The buttons of the pages, flat as the buttons of a toolbar, the page shown marked as a selected tab */
@@ -1109,7 +1145,8 @@
     -fx-text-fill: -text-link;
 }
 
-.hyperlink:hover {
+.hyperlink:hover,
+.hyperlink:focus-visible {
     -fx-underline: true;
 }
 
