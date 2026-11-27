@@ -7,10 +7,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.scene.Scene;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.layout.StackPane;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -122,6 +124,8 @@ class ActionTest {
         ButtonBase textButton = ActionButtons.create(withoutIcon);
         EmptyState empty = new EmptyState();
         empty.getActions().add(withIcon);
+        new Scene(new StackPane(empty));
+        empty.applyCss();
 
         title.set("Orders (3)");
 

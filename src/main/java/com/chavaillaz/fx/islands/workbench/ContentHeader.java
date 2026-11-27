@@ -1,22 +1,20 @@
 package com.chavaillaz.fx.islands.workbench;
 
-import javafx.beans.InvalidationListener;
 import javafx.beans.NamedArg;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.WritableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
+import javafx.css.StyleableProperty;
+import javafx.scene.control.Control;
+import javafx.scene.control.Skin;
 import org.jspecify.annotations.Nullable;
 
 import com.chavaillaz.fx.islands.action.Action;
-import com.chavaillaz.fx.islands.action.ActionButtons;
 import com.chavaillaz.fx.islands.icon.Icon;
-import com.chavaillaz.fx.islands.icon.IconView;
 
 /**
  * The header of the content of the window: a tab naming what the content shows, after its icon, as an editor shows a
@@ -26,9 +24,9 @@ import com.chavaillaz.fx.islands.icon.IconView;
  * It carries the style class {@code content-header}, and its tab {@code content-tab}. An FXML file declares it as
  * {@code <ContentHeader title="SO-10042" icon="RECORD"/>}.
  */
-public final class ContentHeader extends HBox {
+public final class ContentHeader extends Control {
 
-    private final Label tab = new Label();
+    private final StringProperty title = new SimpleStringProperty(this, "title", "");
     private final ObjectProperty<@Nullable Icon> icon = new SimpleObjectProperty<>(this, "icon");
     private final ObservableList<Action> actions = FXCollections.observableArrayList();
 
@@ -37,13 +35,9 @@ public final class ContentHeader extends HBox {
      */
     public ContentHeader() {
         getStyleClass().add("content-header");
-        tab.getStyleClass().add("content-tab");
-        tab.setMnemonicParsing(false);
-        tab.visibleProperty().bind(tab.textProperty().isNotEmpty());
-        tab.managedProperty().bind(tab.visibleProperty());
-        icon.subscribe(shown -> tab.setGraphic(shown == null ? null : new IconView(shown)));
-        actions.addListener((InvalidationListener) observable -> showActions());
-        showActions();
+        // Takes no focus, as a label: given as a style, so that a stylesheet can still change it
+        WritableValue<Boolean> focusTraversable = focusTraversableProperty();
+        ((StyleableProperty<Boolean>) focusTraversable).applyStyle(null, Boolean.FALSE);
     }
 
     /**
@@ -64,7 +58,7 @@ public final class ContentHeader extends HBox {
      * @return the property of the title, empty while the tab is hidden
      */
     public StringProperty titleProperty() {
-        return tab.textProperty();
+        return title;
     }
 
     /**
@@ -73,7 +67,7 @@ public final class ContentHeader extends HBox {
      * @return the title, empty for none
      */
     public String getTitle() {
-        return tab.getText();
+        return title.get();
     }
 
     /**
@@ -82,7 +76,7 @@ public final class ContentHeader extends HBox {
      * @param title the title, empty to hide the tab
      */
     public void setTitle(String title) {
-        tab.setText(title);
+        this.title.set(title);
     }
 
     /**
@@ -121,10 +115,16 @@ public final class ContentHeader extends HBox {
         return actions;
     }
 
-    private void showActions() {
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        getChildren().setAll(tab, spacer);
-        actions.forEach(action -> getChildren().add(ActionButtons.create(action)));
+    @Override
+    protected Skin<?> createDefaultSkin() {
+        return new ContentHeaderSkin(this);
+    }
+
+    /**
+     * Takes no focus: {@inheritDoc}
+     */
+    @Override
+    protected Boolean getInitialFocusTraversable() {
+        return Boolean.FALSE;
     }
 }

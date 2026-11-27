@@ -1,17 +1,13 @@
 package com.chavaillaz.fx.islands.control;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.WritableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.geometry.HPos;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.control.Label;
-import javafx.scene.input.KeyCombination;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.TextAlignment;
+import javafx.css.StyleableProperty;
+import javafx.scene.control.Control;
+import javafx.scene.control.Skin;
 
 import com.chavaillaz.fx.islands.action.Action;
 
@@ -23,11 +19,10 @@ import com.chavaillaz.fx.islands.action.Action;
  * {@code empty-state-text}, its links {@code empty-state-action} and their shortcuts {@code empty-state-shortcut}.
  * A part left empty takes no room.
  */
-public final class EmptyState extends VBox {
+public final class EmptyState extends Control {
 
-    private final Label title = new Label();
-    private final Label text = new Label();
-    private final GridPane actionGrid = new GridPane();
+    private final StringProperty title = new SimpleStringProperty(this, "title", "");
+    private final StringProperty text = new SimpleStringProperty(this, "text", "");
     private final ObservableList<Action> actions = FXCollections.observableArrayList();
 
     /**
@@ -35,20 +30,9 @@ public final class EmptyState extends VBox {
      */
     public EmptyState() {
         getStyleClass().add("empty-state");
-        setFillWidth(false);
-        title.getStyleClass().add("empty-state-title");
-        text.getStyleClass().add("empty-state-text");
-        text.setWrapText(true);
-        text.setTextAlignment(TextAlignment.CENTER);
-        actionGrid.getStyleClass().add("empty-state-actions");
-        title.managedProperty().bind(title.textProperty().isNotEmpty());
-        text.managedProperty().bind(text.textProperty().isNotEmpty());
-        actionGrid.managedProperty().bind(Bindings.isNotEmpty(actions));
-        title.visibleProperty().bind(title.managedProperty());
-        text.visibleProperty().bind(text.managedProperty());
-        actionGrid.visibleProperty().bind(actionGrid.managedProperty());
-        getChildren().addAll(title, text, actionGrid);
-        actions.addListener((InvalidationListener) observable -> showActions());
+        // Takes no focus, as a label: given as a style, so that a stylesheet can still change it
+        WritableValue<Boolean> focusTraversable = focusTraversableProperty();
+        ((StyleableProperty<Boolean>) focusTraversable).applyStyle(null, Boolean.FALSE);
     }
 
     /**
@@ -57,7 +41,7 @@ public final class EmptyState extends VBox {
      * @return the property of the title, empty for none
      */
     public StringProperty titleProperty() {
-        return title.textProperty();
+        return title;
     }
 
     /**
@@ -66,7 +50,7 @@ public final class EmptyState extends VBox {
      * @return the title, empty for none
      */
     public String getTitle() {
-        return title.getText();
+        return title.get();
     }
 
     /**
@@ -75,7 +59,7 @@ public final class EmptyState extends VBox {
      * @param title the title, empty for none
      */
     public void setTitle(String title) {
-        this.title.setText(title);
+        this.title.set(title);
     }
 
     /**
@@ -84,7 +68,7 @@ public final class EmptyState extends VBox {
      * @return the property of the text, empty for none
      */
     public StringProperty textProperty() {
-        return text.textProperty();
+        return text;
     }
 
     /**
@@ -93,7 +77,7 @@ public final class EmptyState extends VBox {
      * @return the text, empty for none
      */
     public String getText() {
-        return text.getText();
+        return text.get();
     }
 
     /**
@@ -102,7 +86,7 @@ public final class EmptyState extends VBox {
      * @param text the text, empty for none
      */
     public void setText(String text) {
-        this.text.setText(text);
+        this.text.set(text);
     }
 
     /**
@@ -114,21 +98,16 @@ public final class EmptyState extends VBox {
         return actions;
     }
 
-    private void showActions() {
-        actionGrid.getChildren().clear();
-        for (int row = 0; row < actions.size(); row++) {
-            Action action = actions.get(row);
-            Hyperlink link = new Hyperlink();
-            link.textProperty().bind(action.textProperty());
-            link.getStyleClass().add("empty-state-action");
-            link.setMnemonicParsing(false);
-            link.disableProperty().bind(action.disabledProperty());
-            link.setOnAction(event -> action.perform());
-            KeyCombination accelerator = action.getAccelerator();
-            Label shortcut = new Label(accelerator == null ? "" : accelerator.getDisplayText());
-            shortcut.getStyleClass().add("empty-state-shortcut");
-            GridPane.setHalignment(link, HPos.RIGHT);
-            actionGrid.addRow(row, link, shortcut);
-        }
+    @Override
+    protected Skin<?> createDefaultSkin() {
+        return new EmptyStateSkin(this);
+    }
+
+    /**
+     * Takes no focus: {@inheritDoc}
+     */
+    @Override
+    protected Boolean getInitialFocusTraversable() {
+        return Boolean.FALSE;
     }
 }

@@ -241,7 +241,9 @@ An icon is stroked in the color of `-icon-default`, which its style class, `icon
 
 A few controls complete those of JavaFX: a `Badge`, a short text tinted after its tone such as the status of a
 record, an `EmptyState`, what an area shows while it has nothing to show, with links to the actions filling it, and a
-`SearchField`, a text field between a magnifier and a button clearing it, as the escape key does.
+`SearchField`, a text field between a magnifier and a button clearing it, as the escape key does. Like the widgets of
+the workbench, they are controls of JavaFX: an application changes them through their properties, their parts
+standing in a skin, which a stylesheet can replace (`-fx-skin`).
 
 The rows of a table are tinted after the tone of their item, the row under the mouse and the selection still showing
 over the tint:

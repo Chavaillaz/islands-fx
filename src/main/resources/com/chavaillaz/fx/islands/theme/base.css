@@ -59,8 +59,6 @@
 }
 
 .title-widget {
-    -fx-alignment: center-left;
-    -fx-spacing: 8px;
     -fx-padding: 0 8px 0 6px;
 }
 
@@ -109,13 +107,13 @@
 
 .tool-window-header,
 .content-header {
-    -fx-alignment: center-left;
     -fx-min-height: 38px;
     -fx-pref-height: 38px;
-    -fx-spacing: 2px;
 }
 
 .tool-window-header {
+    -fx-alignment: center-left;
+    -fx-spacing: 2px;
     -fx-padding: 0 8px 0 12px;
 }
 
@@ -1357,8 +1355,6 @@
 }
 
 .empty-state {
-    -fx-alignment: center;
-    -fx-spacing: 8px;
     -fx-padding: 24px;
 }
 

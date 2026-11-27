@@ -7,8 +7,10 @@ import java.util.stream.Collectors;
 import javafx.beans.NamedArg;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
+import javafx.beans.value.WritableValue;
+import javafx.css.StyleableProperty;
+import javafx.scene.control.Control;
+import javafx.scene.control.Skin;
 import javafx.scene.layout.HeaderBar;
 import javafx.scene.layout.HeaderDragType;
 
@@ -19,7 +21,7 @@ import javafx.scene.layout.HeaderDragType;
  * It carries the style class {@code title-widget}, its badge {@code title-badge} and its title {@code title-name}. An
  * FXML file declares it as {@code <TitleWidget title="Record Explorer"/>}.
  */
-public final class TitleWidget extends HBox {
+public final class TitleWidget extends Control {
 
     private final StringProperty title = new SimpleStringProperty(this, "title", "");
 
@@ -27,16 +29,10 @@ public final class TitleWidget extends HBox {
      * Creates the widget of no title yet.
      */
     public TitleWidget() {
-        Label badge = new Label();
-        badge.getStyleClass().add("title-badge");
-        badge.textProperty().bind(title.map(TitleWidget::initials));
-        badge.visibleProperty().bind(title.isNotEmpty());
-        badge.managedProperty().bind(badge.visibleProperty());
-        Label name = new Label();
-        name.getStyleClass().add("title-name");
-        name.textProperty().bind(title);
-        getChildren().addAll(badge, name);
         getStyleClass().add("title-widget");
+        // Takes no focus, as a label: given as a style, so that a stylesheet can still change it
+        WritableValue<Boolean> focusTraversable = focusTraversableProperty();
+        ((StyleableProperty<Boolean>) focusTraversable).applyStyle(null, Boolean.FALSE);
         HeaderBar.setDragType(this, HeaderDragType.DRAGGABLE_SUBTREE);
     }
 
@@ -75,6 +71,19 @@ public final class TitleWidget extends HBox {
      */
     public void setTitle(String title) {
         this.title.set(title);
+    }
+
+    @Override
+    protected Skin<?> createDefaultSkin() {
+        return new TitleWidgetSkin(this);
+    }
+
+    /**
+     * Takes no focus: {@inheritDoc}
+     */
+    @Override
+    protected Boolean getInitialFocusTraversable() {
+        return Boolean.FALSE;
     }
 
     /**

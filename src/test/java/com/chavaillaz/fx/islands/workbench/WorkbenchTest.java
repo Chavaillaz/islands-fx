@@ -8,6 +8,7 @@ import java.util.Locale;
 
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.css.PseudoClass;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -322,12 +323,22 @@ class WorkbenchTest {
     void clipsIslandContent() {
         StackPane content = new StackPane();
         Island island = new Island(content);
+        new Scene(new StackPane(island));
+        island.applyCss();
         island.resize(300, 200);
 
+        assertThat(island.getSkin()).isInstanceOf(IslandSkin.class);
+        assertThat(island.isFocusTraversable()).isFalse();
         assertThat(island.getContent()).isSameAs(content);
+        assertThat(content.getParent()).isSameAs(island);
         assertThat(island.getClip().getLayoutBounds().getWidth()).isEqualTo(300);
         island.setContent(null);
         assertThat(island.getContent()).isNull();
+        assertThat(content.getParent()).isNull();
+
+        island.setContent(content);
+        island.setSkin(new IslandSkin(island));
+        assertThat(content.getParent()).isSameAs(island);
     }
 
     @Test
@@ -390,15 +401,31 @@ class WorkbenchTest {
     @DisplayName("Titles the window with the initials of its title in a badge")
     void titlesWindowWithInitials() {
         assertThat(TitleWidget.initials("Record Explorer")).isEqualTo("RE");
-        assertThat(TitleWidget.initials("QAFFE KT Viewer")).isEqualTo("QK");
+        assertThat(TitleWidget.initials("Order Desk Viewer")).isEqualTo("OD");
         assertThat(TitleWidget.initials("explorer")).isEqualTo("EX");
         assertThat(TitleWidget.initials(" x ")).isEqualTo("X");
         assertThat(new TitleWidget("Record Explorer").getStyleClass()).contains("title-widget");
 
         TitleWidget widget = new TitleWidget();
+        new Scene(new StackPane(widget));
+        widget.applyCss();
         widget.setTitle("Order Desk");
-        assertThat(widget.getChildren()).extracting(node -> ((Label) node).getText()).containsExactly("OD", "Order Desk");
+        assertThat(widget.getSkin()).isInstanceOf(TitleWidgetSkin.class);
+        assertThat(widget.isFocusTraversable()).isFalse();
+        assertThat(((Label) widget.lookup(".title-badge")).getText()).isEqualTo("OD");
+        assertThat(((Label) widget.lookup(".title-name")).getText()).isEqualTo("Order Desk");
         assertThat(widget.getTitle()).isEqualTo("Order Desk");
+
+        widget.setSkin(new TitleWidgetSkin(widget));
+        assertThat(widget.lookupAll(".title-name")).hasSize(1);
+
+        // Its size is the one of what it shows, its padding added
+        widget.setPadding(new Insets(0, 8, 0, 6));
+        Node row = widget.getChildrenUnmodifiable().getFirst();
+        assertThat(widget.prefWidth(-1)).isEqualTo(row.prefWidth(-1) + 14);
+        assertThat(widget.minWidth(-1)).isEqualTo(row.minWidth(-1) + 14);
+        assertThat(widget.prefHeight(-1)).isEqualTo(row.prefHeight(-1));
+        assertThat(widget.minHeight(-1)).isEqualTo(row.minHeight(-1));
     }
 
     @Test
