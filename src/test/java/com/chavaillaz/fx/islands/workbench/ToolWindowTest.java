@@ -71,4 +71,16 @@ class ToolWindowTest {
         assertThat(toolWindow.isVisible()).isFalse();
         assertThat(toolWindow.getHideAction().getIcon()).isEqualTo(Icons.HIDE);
     }
+
+    @Test
+    @DisplayName("Renames itself, the text and description of its toggle action following")
+    void renamesItself() {
+        ToolWindow toolWindow = ToolWindow.builder("problems", "Problems", Icons.WARNING, new StackPane()).build();
+        toolWindow.setTitle("Problems (3)");
+
+        assertThat(toolWindow.getTitle()).isEqualTo("Problems (3)");
+        assertThat(toolWindow.titleProperty().get()).isEqualTo("Problems (3)");
+        assertThat(toolWindow.getToggleAction().getText()).isEqualTo("Problems (3)");
+        assertThat(toolWindow.getToggleAction().getDescription()).contains("Problems (3)");
+    }
 }

@@ -140,8 +140,9 @@ An application keeping it in the main toolbar on macOS as well creates its workb
 
 A tool window docks on the left, unless told otherwise: on the right, or under the content, where one shows at a time,
 such as a log or the output of a task (`.anchor(ToolWindowAnchor.BOTTOM)`), its button at the bottom of the left
-stripe. The workbench gives the tool window docked under an identifier (`getToolWindow("records")`), and undocks one
-(`removeToolWindow`), its island, button and shortcuts leaving the window.
+stripe. Its title and actions can change once docked (`setTitle`, `getActions()`), such as a count of what it lists,
+its header, button and menu items following. The workbench gives the tool window docked under an identifier
+(`getToolWindow("records")`), and undocks one (`removeToolWindow`), its island, button and shortcuts leaving the window.
 
 The content can be headed by a `ContentHeader`, a tab naming what it shows beside the buttons of its actions, and the
 status bar can tell how a task of the application stands with a `TaskStatus`, which follows a `Task` of JavaFX by
@@ -189,7 +190,8 @@ MenuItem item = ActionMenus.createItem(refresh);      // a menu item, with its s
 ```
 
 A toggle action is given the state it shows with `selected(...)`, its handler changing that state: it is shown as a
-check menu item or a toggle button.
+check menu item or a toggle button. Its text and description can follow values as well (`text(...)`,
+`description(...)`), which the menu items, buttons and links showing it follow.
 
 The shortcut of an action works wherever the focus stands in the window once the workbench knows the action: those
 of its tool windows and of its main menu, and those the application registers, such as the actions of its own

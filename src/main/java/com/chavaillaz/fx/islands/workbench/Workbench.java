@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import javafx.collections.ListChangeListener;
 import javafx.css.PseudoClass;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -185,10 +186,9 @@ public final class Workbench {
                 ? showAloneAtBottom(toolWindow)
                 : Subscription.EMPTY;
         toolWindows.add(toolWindow);
-        dockings.put(toolWindow, docking);
         registerActions(toolWindow.getToggleAction());
         toolWindow.getActions().forEach(this::registerActions);
-        islands.dock(toolWindow, createIsland(toolWindow));
+        dockings.put(toolWindow, docking.and(dockIsland(toolWindow)));
         stripe(toolWindow).add(toolWindow);
     }
 
@@ -463,19 +463,40 @@ public final class Workbench {
         item.fire();
     }
 
-    private static Island createIsland(ToolWindow toolWindow) {
-        Label title = new Label(toolWindow.getTitle());
+    /**
+     * Docks the island of a tool window, headed by its title and the buttons of its actions, which follow the tool
+     * window as the application changes them, the workbench knowing the actions added and forgetting those removed.
+     *
+     * @return the subscription, which stops following the actions once unsubscribed
+     */
+    private Subscription dockIsland(ToolWindow toolWindow) {
+        Label title = new Label();
         title.getStyleClass().add("tool-window-title");
+        title.textProperty().bind(toolWindow.titleProperty());
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        HBox header = new HBox(title, spacer);
+        HBox header = new HBox();
         header.getStyleClass().add("tool-window-header");
-        toolWindow.getActions().forEach(action -> header.getChildren().add(ActionButtons.create(action)));
-        header.getChildren().add(ActionButtons.create(toolWindow.getHideAction()));
+        Runnable showActions = () -> {
+            header.getChildren().setAll(title, spacer);
+            toolWindow.getActions().forEach(action -> header.getChildren().add(ActionButtons.create(action)));
+            header.getChildren().add(ActionButtons.create(toolWindow.getHideAction()));
+        };
+        showActions.run();
+        ListChangeListener<Action> followActions = change -> {
+            while (change.next()) {
+                change.getRemoved().forEach(this::unregisterActions);
+                change.getAddedSubList().forEach(this::registerActions);
+            }
+            showActions.run();
+        };
+        toolWindow.getActions().addListener(followActions);
+
         BorderPane toolWindowLayout = new BorderPane(toolWindow.getContent());
         toolWindowLayout.setTop(header);
         Island island = new Island(toolWindowLayout);
         island.getStyleClass().add("tool-window");
-        return island;
+        islands.dock(toolWindow, island);
+        return () -> toolWindow.getActions().removeListener(followActions);
     }
 }

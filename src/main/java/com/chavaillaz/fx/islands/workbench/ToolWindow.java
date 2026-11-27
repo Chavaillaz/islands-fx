@@ -4,10 +4,15 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.List;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.input.KeyCombination;
 import org.jspecify.annotations.Nullable;
@@ -40,11 +45,11 @@ public final class ToolWindow {
     public static final double MIN_HEIGHT = 100;
 
     private final String id;
-    private final String title;
+    private final StringProperty title;
     private final Icon icon;
     private final ToolWindowAnchor anchor;
     private final Node content;
-    private final List<Action> actions;
+    private final ObservableList<Action> actions;
     private final BooleanProperty visible = new SimpleBooleanProperty(this, "visible", true);
     private final DoubleProperty width;
     private final DoubleProperty height;
@@ -53,15 +58,16 @@ public final class ToolWindow {
 
     private ToolWindow(Builder builder) {
         id = builder.id;
-        title = builder.title;
+        title = new SimpleStringProperty(this, "title", builder.title);
         icon = builder.icon;
         anchor = builder.anchor;
         content = builder.content;
-        actions = builder.actions;
+        actions = FXCollections.observableArrayList(builder.actions);
         width = new SimpleDoubleProperty(this, "width", builder.width);
         height = new SimpleDoubleProperty(this, "height", builder.height);
-        Action.Builder toggle = Action.builder(id + ".toggle", title)
-                .description(Texts.format("toolWindow.toggle", title))
+        Action.Builder toggle = Action.builder(id + ".toggle", builder.title)
+                .text(title)
+                .description(Bindings.createStringBinding(() -> Texts.format("toolWindow.toggle", getTitle()), title))
                 .icon(icon)
                 .selected(visible)
                 .handler(() -> setVisible(!isVisible()));
@@ -103,7 +109,25 @@ public final class ToolWindow {
      * @return the title
      */
     public String getTitle() {
+        return title.get();
+    }
+
+    /**
+     * Gives the title of the tool window, which its header, its button and the menu items showing it follow.
+     *
+     * @return the property of the title
+     */
+    public StringProperty titleProperty() {
         return title;
+    }
+
+    /**
+     * Renames the tool window.
+     *
+     * @param title the title, such as one telling how many items the tool window lists
+     */
+    public void setTitle(String title) {
+        this.title.set(title);
     }
 
     /**
@@ -134,11 +158,12 @@ public final class ToolWindow {
     }
 
     /**
-     * Gives the actions whose buttons the header shows, before the one hiding the tool window.
+     * Gives the actions whose buttons the header shows, before the one hiding the tool window, which the application
+     * changes as what the tool window shows changes: the header and the shortcuts follow them.
      *
-     * @return the actions, in the order of their buttons
+     * @return the modifiable list of the actions, in the order of their buttons
      */
-    public List<Action> getActions() {
+    public ObservableList<Action> getActions() {
         return actions;
     }
 

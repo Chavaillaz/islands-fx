@@ -2,6 +2,7 @@ package com.chavaillaz.fx.islands.action;
 
 import java.util.List;
 
+import javafx.beans.binding.Bindings;
 import javafx.geometry.Side;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBase;
@@ -72,7 +73,8 @@ public final class ActionButtons {
             button.textProperty().bind(action.textProperty());
         }
         button.accessibleTextProperty().bind(action.textProperty());
-        button.getTooltip().textProperty().bind(action.textProperty().map(text -> action.tooltip()));
+        button.getTooltip().textProperty().bind(
+                Bindings.createStringBinding(action::tooltip, action.textProperty(), action.descriptionProperty()));
     }
 
     /**

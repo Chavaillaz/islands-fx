@@ -29,7 +29,7 @@ public final class Action implements ActionElement {
 
     private final String id;
     private final ReadOnlyStringWrapper text = new ReadOnlyStringWrapper(this, "text");
-    private final @Nullable String description;
+    private final ReadOnlyStringWrapper description = new ReadOnlyStringWrapper(this, "description");
     private final @Nullable Icon icon;
     private final @Nullable KeyCombination accelerator;
     private final boolean toggle;
@@ -43,7 +43,10 @@ public final class Action implements ActionElement {
         if (builder.followedText != null) {
             text.bind(builder.followedText);
         }
-        description = builder.description;
+        description.set(builder.description);
+        if (builder.followedDescription != null) {
+            description.bind(builder.followedDescription);
+        }
         icon = builder.icon;
         accelerator = builder.accelerator;
         toggle = builder.selected != null;
@@ -100,7 +103,17 @@ public final class Action implements ActionElement {
      * @return the description, or {@code null} for an action its text describes well enough
      */
     public @Nullable String getDescription() {
-        return description;
+        String value = description.get();
+        return value == null || value.isEmpty() ? null : value;
+    }
+
+    /**
+     * Gives what the action does, which changes when it follows a value.
+     *
+     * @return the property following the description the action was given, empty or {@code null} for none
+     */
+    public ReadOnlyStringProperty descriptionProperty() {
+        return description.getReadOnlyProperty();
     }
 
     /**
@@ -185,8 +198,9 @@ public final class Action implements ActionElement {
         if (accelerator != null) {
             tooltip.append("  ").append(accelerator.getDisplayText());
         }
-        if (description != null) {
-            tooltip.append('\n').append(description);
+        String about = getDescription();
+        if (about != null) {
+            tooltip.append('\n').append(about);
         }
         return tooltip.toString();
     }
@@ -205,6 +219,7 @@ public final class Action implements ActionElement {
         private final String text;
         private @Nullable ObservableStringValue followedText;
         private @Nullable String description;
+        private @Nullable ObservableStringValue followedDescription;
         private @Nullable Icon icon;
         private @Nullable KeyCombination accelerator;
         private @Nullable ObservableBooleanValue selected;
@@ -236,6 +251,17 @@ public final class Action implements ActionElement {
          */
         public Builder description(String description) {
             this.description = description;
+            return this;
+        }
+
+        /**
+         * Gives the action a description following a value, such as one naming the title of a tool window renamed.
+         *
+         * @param description what the action does, in a sentence
+         * @return this builder
+         */
+        public Builder description(ObservableStringValue description) {
+            this.followedDescription = requireNonNull(description, "description");
             return this;
         }
 

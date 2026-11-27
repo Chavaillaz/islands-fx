@@ -84,6 +84,31 @@ class WorkbenchTest {
     }
 
     @Test
+    @DisplayName("Follows the title and the actions of a tool window as the application changes them")
+    void followsToolWindowChanges() {
+        KeyCombination accelerator = KeyCombination.keyCombination("Shortcut+R");
+        Action refresh = Action.builder("test.refresh", "Refresh").icon(Icons.REFRESH).accelerator(accelerator)
+                .handler(() -> { }).build();
+        StackPane content = new StackPane();
+        ToolWindow toolWindow = ToolWindow.builder("problems", "Problems", Icons.WARNING, content).build();
+        workbench.addToolWindow(toolWindow);
+        Scene scene = workbench.createScene(new Stage());
+        HBox header = (HBox) ((BorderPane) content.getParent()).getTop();
+
+        toolWindow.setTitle("Problems (3)");
+        toolWindow.getActions().add(refresh);
+        assertThat(((Label) header.getChildren().getFirst()).getText()).isEqualTo("Problems (3)");
+        assertThat(((ToolWindowStripe) root.getLeft()).getButtons()).singleElement()
+                .satisfies(button -> assertThat(((ButtonBase) button).getTooltip().getText()).startsWith("Problems (3)"));
+        assertThat(header.getChildren()).filteredOn(ButtonBase.class::isInstance).hasSize(2);
+        assertThat(scene.getAccelerators()).containsKey(accelerator);
+
+        toolWindow.getActions().remove(refresh);
+        assertThat(header.getChildren()).filteredOn(ButtonBase.class::isInstance).hasSize(1);
+        assertThat(scene.getAccelerators()).doesNotContainKey(accelerator);
+    }
+
+    @Test
     @DisplayName("Looks up a tool window by its identifier")
     void looksUpToolWindow() {
         ToolWindow orders = ToolWindow.builder("orders", "Orders", Icons.RECORDS, new StackPane()).build();
