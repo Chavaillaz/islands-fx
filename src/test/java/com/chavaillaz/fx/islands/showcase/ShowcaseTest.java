@@ -125,7 +125,9 @@ class ShowcaseTest {
             assertThat(image.getHeight()).isEqualTo(Showcase.HEIGHT * SCALE);
             assertThat(scene.getRoot().lookupAll(".stripe-button")).hasSize(5);
             assertThat(scene.getRoot().lookupAll(".tool-window").stream().filter(Node::isVisible)).hasSize(3);
-            assertThat(texts(scene, ".content-header")).contains("SO-10042");
+            assertThat(texts(scene, ".content-tabs > .tab-header-area")).contains("SO-10040", "SO-10042", "SO-10043");
+            assertThat(showcase.getOrderTabs().getSelectionModel().getSelectedItem().getText()).isEqualTo("SO-10042");
+            assertThat(showcase.getWorkbench().getStatusBar().getPath()).containsExactly("Orders", "SO-10042");
             if (mode == ThemeMode.DARK) {
                 assertThat(texts(scene, ".notification-title"))
                         .containsExactlyInAnyOrder("Order SO-10041 saved", "Could not reach the payment service");

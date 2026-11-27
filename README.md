@@ -8,9 +8,9 @@
 Light and dark themes for JavaFX applications, and the workbench of their main window: its toolbar standing in the
 title bar, its content and tool windows in rounded islands.
 
-![The main window of an application in the dark theme, its orders in a tool window on the left, the order selected in
-the middle, its properties on the right and a log below, two notifications over the bottom right
-corner](docs/screenshots/workbench-dark.png)
+![The main window of an application in the dark theme, its orders in a tool window on the left, three of them open in
+tabs in the middle, the properties of the one selected on the right and a log below, two notifications over the bottom
+right corner](docs/screenshots/workbench-dark.png)
 
 - **Workbench**: the main toolbar standing in the title bar of the window, beside the buttons of the operating system,
   the tool windows docked in rounded islands beside the content or under it, their buttons on stripes along the sides,
