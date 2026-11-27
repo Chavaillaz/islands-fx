@@ -6,12 +6,17 @@ import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.scene.control.ButtonBase;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.control.MenuItem;
 import javafx.scene.input.KeyCombination;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.chavaillaz.fx.islands.JavaFxExtension;
+import com.chavaillaz.fx.islands.control.EmptyState;
 import com.chavaillaz.fx.islands.icon.Icons;
 
 @ExtendWith(JavaFxExtension.class)
@@ -103,5 +108,31 @@ class ActionTest {
         assertThatNullPointerException()
                 .isThrownBy(builder::build)
                 .withMessageContaining("test.nothing");
+    }
+
+    @Test
+    @DisplayName("Follows the text it is given, as do its menu items, buttons and links")
+    void followsText() {
+        SimpleStringProperty title = new SimpleStringProperty("Orders");
+        Action withIcon = Action.builder("test.orders", "Orders").text(title).icon(Icons.RECORDS)
+                .handler(() -> { }).build();
+        Action withoutIcon = Action.builder("test.refresh", "Refresh").text(title).handler(() -> { }).build();
+        MenuItem item = ActionMenus.createItem(withIcon);
+        ButtonBase iconButton = ActionButtons.create(withIcon);
+        ButtonBase textButton = ActionButtons.create(withoutIcon);
+        EmptyState empty = new EmptyState();
+        empty.getActions().add(withIcon);
+
+        title.set("Orders (3)");
+
+        assertThat(withIcon.getText()).isEqualTo("Orders (3)");
+        assertThat(withIcon.textProperty().get()).isEqualTo("Orders (3)");
+        assertThat(item.getText()).isEqualTo("Orders (3)");
+        assertThat(iconButton.getText()).isEmpty();
+        assertThat(iconButton.getAccessibleText()).isEqualTo("Orders (3)");
+        assertThat(iconButton.getTooltip().getText()).isEqualTo("Orders (3)");
+        assertThat(textButton.getText()).isEqualTo("Orders (3)");
+        assertThat(empty.lookupAll(".empty-state-action")).singleElement()
+                .satisfies(link -> assertThat(((Hyperlink) link).getText()).isEqualTo("Orders (3)"));
     }
 }

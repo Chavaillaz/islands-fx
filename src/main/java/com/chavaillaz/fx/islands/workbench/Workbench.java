@@ -381,6 +381,7 @@ public final class Workbench {
      */
     private static Action wrap(MenuItem item, String path) {
         Action.Builder builder = Action.builder("menu." + path + '.' + item.getText(), item.getText())
+                .text(item.textProperty())
                 .disabled(item.disableProperty())
                 .handler(() -> choose(item));
         if (item.getAccelerator() != null) {

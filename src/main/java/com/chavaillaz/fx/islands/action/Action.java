@@ -1,10 +1,14 @@
 package com.chavaillaz.fx.islands.action;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.Objects.requireNonNullElse;
 
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
+import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableBooleanValue;
+import javafx.beans.value.ObservableStringValue;
 import javafx.scene.input.KeyCombination;
 import org.jspecify.annotations.Nullable;
 
@@ -18,12 +22,13 @@ import com.chavaillaz.fx.islands.icon.Icon;
  * An action does not hold the state it shows: it follows the observable values it is given, which its handler
  * changes. A toggle action, given whether it is {@link Builder#selected(ObservableBooleanValue) selected}, is shown as
  * a check menu item or a toggle button reflecting that value, which choosing it does not change by itself, but
- * through the handler.
+ * through the handler. Its text can follow a value as well, such as the title of a tool window the application renames
+ * ({@link Builder#text(ObservableStringValue)}), which the menu items, buttons and links showing it follow too.
  */
 public final class Action implements ActionElement {
 
     private final String id;
-    private final String text;
+    private final ReadOnlyStringWrapper text = new ReadOnlyStringWrapper(this, "text");
     private final @Nullable String description;
     private final @Nullable Icon icon;
     private final @Nullable KeyCombination accelerator;
@@ -34,7 +39,10 @@ public final class Action implements ActionElement {
 
     private Action(Builder builder) {
         id = builder.id;
-        text = builder.text;
+        text.set(builder.text);
+        if (builder.followedText != null) {
+            text.bind(builder.followedText);
+        }
         description = builder.description;
         icon = builder.icon;
         accelerator = builder.accelerator;
@@ -74,7 +82,16 @@ public final class Action implements ActionElement {
      * @return the text
      */
     public String getText() {
-        return text;
+        return requireNonNullElse(text.get(), "");
+    }
+
+    /**
+     * Gives the text of the action, which changes when it follows a value.
+     *
+     * @return the property following the text the action was given
+     */
+    public ReadOnlyStringProperty textProperty() {
+        return text.getReadOnlyProperty();
     }
 
     /**
@@ -164,7 +181,7 @@ public final class Action implements ActionElement {
      * @return the text of the tooltip
      */
     public String tooltip() {
-        StringBuilder tooltip = new StringBuilder(text);
+        StringBuilder tooltip = new StringBuilder(getText());
         if (accelerator != null) {
             tooltip.append("  ").append(accelerator.getDisplayText());
         }
@@ -186,6 +203,7 @@ public final class Action implements ActionElement {
 
         private final String id;
         private final String text;
+        private @Nullable ObservableStringValue followedText;
         private @Nullable String description;
         private @Nullable Icon icon;
         private @Nullable KeyCombination accelerator;
@@ -196,6 +214,18 @@ public final class Action implements ActionElement {
         private Builder(String id, String text) {
             this.id = requireNonNull(id, "id");
             this.text = requireNonNull(text, "text");
+        }
+
+        /**
+         * Makes the text of the action follow a value instead of the one given first, such as the title of a tool
+         * window the application renames: the menu items, buttons and links showing the action follow it as well.
+         *
+         * @param text the text of the action, as menus show it
+         * @return this builder
+         */
+        public Builder text(ObservableStringValue text) {
+            this.followedText = requireNonNull(text, "text");
+            return this;
         }
 
         /**

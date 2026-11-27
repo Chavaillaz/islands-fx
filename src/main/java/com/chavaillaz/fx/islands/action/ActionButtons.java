@@ -58,8 +58,21 @@ public final class ActionButtons {
             button.setOnAction(event -> action.perform());
         }
         configure(button, action.getText(), action.getIcon(), action.tooltip(), iconSize);
+        follow(button, action);
         button.disableProperty().bind(action.disabledProperty());
         return button;
+    }
+
+    /**
+     * Makes a button follow the text of its action: its own text when it shows no icon, its tooltip, and the text
+     * standing for it in the screen readers.
+     */
+    private static void follow(ButtonBase button, Action action) {
+        if (action.getIcon() == null) {
+            button.textProperty().bind(action.textProperty());
+        }
+        button.accessibleTextProperty().bind(action.textProperty());
+        button.getTooltip().textProperty().bind(action.textProperty().map(text -> action.tooltip()));
     }
 
     /**

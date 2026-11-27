@@ -99,6 +99,7 @@ public final class ActionMenus {
             item.setOnAction(event -> action.perform());
         }
         item.getProperties().put(Action.class, action);
+        item.textProperty().bind(action.textProperty());
         item.setMnemonicParsing(false);
         item.setAccelerator(action.getAccelerator());
         item.disableProperty().bind(action.disabledProperty());

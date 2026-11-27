@@ -144,7 +144,8 @@ final class NotificationLayer extends VBox {
         }
 
         private ButtonBase link(Action action) {
-            Hyperlink link = new Hyperlink(action.getText());
+            Hyperlink link = new Hyperlink();
+            link.textProperty().bind(action.textProperty());
             link.getStyleClass().add("notification-action");
             link.setMnemonicParsing(false);
             link.disableProperty().bind(action.disabledProperty());

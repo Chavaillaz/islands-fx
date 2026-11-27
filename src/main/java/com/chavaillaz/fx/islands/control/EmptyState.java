@@ -118,7 +118,8 @@ public final class EmptyState extends VBox {
         actionGrid.getChildren().clear();
         for (int row = 0; row < actions.size(); row++) {
             Action action = actions.get(row);
-            Hyperlink link = new Hyperlink(action.getText());
+            Hyperlink link = new Hyperlink();
+            link.textProperty().bind(action.textProperty());
             link.getStyleClass().add("empty-state-action");
             link.setMnemonicParsing(false);
             link.disableProperty().bind(action.disabledProperty());
