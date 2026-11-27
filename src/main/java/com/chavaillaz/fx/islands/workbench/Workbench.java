@@ -17,16 +17,23 @@ import java.util.stream.Stream;
 import javafx.collections.ListChangeListener;
 import javafx.css.PseudoClass;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TreeTableView;
+import javafx.scene.control.TreeView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.HeaderBar;
@@ -57,6 +64,11 @@ import com.chavaillaz.fx.islands.internal.Texts;
  * {@link #registerActions(Action...) registers}: their shortcuts work wherever the focus stands in the window, and the
  * {@link #getSearchAction() search of the actions} finds them.
  * <p>
+ * A tool window the user shows through its button, menu item or shortcut takes the focus, on the node of its content
+ * it last held, or the first one taking the focus. Hiding it gives the focus back to the content of the window when
+ * the tool window held it, and so does the escape key in the tool window, which stays shown: {@code Shift+Escape}
+ * hides it as well.
+ * <p>
  * It carries the style class {@code workbench}, the island of the content {@code content-island}, and those of the
  * tool windows {@code tool-window}. The islands carry the pseudo-classes {@code :left-stripe} and
  * {@code :right-stripe} while the stripe on that side shows, the stylesheets spacing them from the edges of the window
@@ -78,6 +90,9 @@ public final class Workbench {
     private final ToolWindowStripe rightStripe = new ToolWindowStripe(ToolWindowAnchor.RIGHT);
     private final List<ToolWindow> toolWindows = new ArrayList<>();
     private final Map<ToolWindow, Subscription> dockings = new HashMap<>();
+    private final Map<ToolWindow, Island> toolWindowIslands = new HashMap<>();
+    private final Map<Node, Node> lastFocus = new HashMap<>();
+    private Subscription focusFollowing = Subscription.EMPTY;
     private final List<Action> actions = new ArrayList<>();
     private final Map<Action, Runnable> performers = new HashMap<>();
     private final List<ActionSearch.Entry> menuEntries = new ArrayList<>();
@@ -127,8 +142,11 @@ public final class Workbench {
         leftStripe.visibleProperty().subscribe(shown -> islands.pseudoClassStateChanged(LEFT_STRIPE, shown));
         rightStripe.visibleProperty().subscribe(shown -> islands.pseudoClassStateChanged(RIGHT_STRIPE, shown));
         root.sceneProperty().subscribe(scene -> {
+            focusFollowing.unsubscribe();
+            focusFollowing = Subscription.EMPTY;
             if (scene != null) {
                 scene.getAccelerators().putAll(shortcuts);
+                focusFollowing = scene.focusOwnerProperty().subscribe(this::rememberFocus);
             }
         });
         registerActions(searchAction);
@@ -167,6 +185,7 @@ public final class Workbench {
      * @param node the content, filling the island
      */
     public void setContent(Node node) {
+        lastFocus.remove(content);
         content.setContent(node);
     }
 
@@ -176,12 +195,17 @@ public final class Workbench {
      * shows there already.
      *
      * @param toolWindow the tool window
-     * @throws IllegalArgumentException when a tool window of the same identifier is already docked
+     * @throws IllegalArgumentException when a tool window of the same identifier is already docked, or when the tool
+     *                                  window docks in another workbench
      */
     public void addToolWindow(ToolWindow toolWindow) {
         if (toolWindows.stream().anyMatch(each -> each.getId().equals(toolWindow.getId()))) {
             throw new IllegalArgumentException("A tool window named " + toolWindow.getId() + " is already docked");
         }
+        if (toolWindow.getWorkbench() != null) {
+            throw new IllegalArgumentException("The tool window " + toolWindow.getId() + " docks in another workbench");
+        }
+        toolWindow.setWorkbench(this);
         Subscription docking = toolWindow.getAnchor() == ToolWindowAnchor.BOTTOM
                 ? showAloneAtBottom(toolWindow)
                 : Subscription.EMPTY;
@@ -194,8 +218,8 @@ public final class Workbench {
 
     /**
      * Undocks a tool window: its island and its button leave the workbench, and the shortcuts of its actions stop
-     * working. The items the application put in its menus for it stay, the application removing them itself. The tool
-     * window can be docked again.
+     * working, the focus going back to the content when the tool window held it. The items the application put in its
+     * menus for it stay, the application removing them itself. The tool window can be docked again.
      *
      * @param toolWindow the tool window
      * @return {@code true} when it was docked
@@ -204,6 +228,12 @@ public final class Workbench {
         if (!toolWindows.remove(toolWindow)) {
             return false;
         }
+        Island island = toolWindowIslands.remove(toolWindow);
+        if (holdsFocus(island)) {
+            focusInto(content);
+        }
+        lastFocus.remove(island);
+        toolWindow.setWorkbench(null);
         dockings.remove(toolWindow).unsubscribe();
         unregisterActions(toolWindow.getToggleAction());
         toolWindow.getActions().forEach(this::unregisterActions);
@@ -357,6 +387,122 @@ public final class Workbench {
         });
     }
 
+    /**
+     * Shows a tool window and gives it the focus when hidden, or hides it when shown, as the user asked through its
+     * toggle action.
+     */
+    void toggle(ToolWindow toolWindow) {
+        if (toolWindow.isVisible()) {
+            hide(toolWindow);
+        } else {
+            toolWindow.setVisible(true);
+            focusInto(toolWindowIslands.get(toolWindow));
+        }
+    }
+
+    /**
+     * Hides a tool window as the user asked, giving the focus back to the content when the tool window held it.
+     */
+    void hide(ToolWindow toolWindow) {
+        boolean focused = holdsFocus(toolWindowIslands.get(toolWindow));
+        toolWindow.setVisible(false);
+        if (focused) {
+            focusInto(content);
+        }
+    }
+
+    /**
+     * Remembers the node of an island holding the focus, the content or a tool window, to give it back the focus.
+     */
+    private void rememberFocus(@Nullable Node owner) {
+        for (Node node = owner; node != null; node = node.getParent()) {
+            if (node == content || toolWindowIslands.containsValue(node)) {
+                lastFocus.put(node, owner);
+                return;
+            }
+        }
+    }
+
+    private boolean holdsFocus(Node island) {
+        Scene scene = root.getScene();
+        return scene != null && within(scene.getFocusOwner(), island);
+    }
+
+    /**
+     * Gives the focus to an island: to the node it last held, or else to the first one of the island taking the focus.
+     */
+    private void focusInto(Node island) {
+        Node last = lastFocus.get(island);
+        Node target = last != null && within(last, island) && showing(last, island) && !last.isDisabled()
+                ? last
+                : firstFocusable(island);
+        if (target != null) {
+            target.requestFocus();
+        }
+    }
+
+    /**
+     * Tells whether a target of the keyboard stands in a list, a table or a tree editing none of its cells.
+     */
+    private static boolean inViewEditingNothing(@Nullable Object target) {
+        for (Node node = target instanceof Node start ? start : null; node != null; node = node.getParent()) {
+            switch (node) {
+                case ListView<?> list -> {
+                    return list.getEditingIndex() < 0;
+                }
+                case TableView<?> table -> {
+                    return table.getEditingCell() == null;
+                }
+                case TreeView<?> tree -> {
+                    return tree.getEditingItem() == null;
+                }
+                case TreeTableView<?> tree -> {
+                    return tree.getEditingCell() == null;
+                }
+                default -> {
+                    // Not a view, its parent may be one
+                }
+            }
+        }
+        return false;
+    }
+
+    private static boolean within(@Nullable Node node, Node ancestor) {
+        for (Node each = node; each != null; each = each.getParent()) {
+            if (each == ancestor) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean showing(Node node, Node ancestor) {
+        for (Node each = node; each != null && each != ancestor; each = each.getParent()) {
+            if (!each.isVisible()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static @Nullable Node firstFocusable(Node node) {
+        if (!node.isVisible() || node.isDisabled()) {
+            return null;
+        }
+        if (node.isFocusTraversable()) {
+            return node;
+        }
+        if (node instanceof Parent parent) {
+            for (Node child : parent.getChildrenUnmodifiable()) {
+                Node found = firstFocusable(child);
+                if (found != null) {
+                    return found;
+                }
+            }
+        }
+        return null;
+    }
+
     private ToolWindowStripe stripe(ToolWindow toolWindow) {
         return toolWindow.getAnchor() == ToolWindowAnchor.RIGHT ? rightStripe : leftStripe;
     }
@@ -496,7 +642,31 @@ public final class Workbench {
         toolWindowLayout.setTop(header);
         Island island = new Island(toolWindowLayout);
         island.getStyleClass().add("tool-window");
+        // Lists, tables and trees take the escape key even while editing nothing, which they are then left without
+        island.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (inViewEditingNothing(event.getTarget())) {
+                escape(toolWindow, event);
+            }
+        });
+        island.addEventHandler(KeyEvent.KEY_PRESSED, event -> escape(toolWindow, event));
+        toolWindowIslands.put(toolWindow, island);
         islands.dock(toolWindow, island);
         return () -> toolWindow.getActions().removeListener(followActions);
+    }
+
+    /**
+     * Gives the focus back to the content on the escape key left to the tool window, hiding it as well with the shift
+     * key down.
+     */
+    private void escape(ToolWindow toolWindow, KeyEvent event) {
+        if (event.getCode() != KeyCode.ESCAPE || event.isControlDown() || event.isAltDown() || event.isMetaDown()) {
+            return;
+        }
+        if (event.isShiftDown()) {
+            hide(toolWindow);
+        } else {
+            focusInto(content);
+        }
+        event.consume();
     }
 }

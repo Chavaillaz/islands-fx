@@ -10,12 +10,16 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.css.PseudoClass;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -29,6 +33,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import com.chavaillaz.fx.islands.JavaFxExtension;
 import com.chavaillaz.fx.islands.action.Action;
 import com.chavaillaz.fx.islands.action.ActionMenus;
+import com.chavaillaz.fx.islands.control.SearchField;
 import com.chavaillaz.fx.islands.icon.Icons;
 
 @ExtendWith(JavaFxExtension.class)
@@ -106,6 +111,99 @@ class WorkbenchTest {
         toolWindow.getActions().remove(refresh);
         assertThat(header.getChildren()).filteredOn(ButtonBase.class::isInstance).hasSize(1);
         assertThat(scene.getAccelerators()).doesNotContainKey(accelerator);
+    }
+
+    @Test
+    @DisplayName("Moves the focus into a tool window the user shows, and back to the content once hidden or removed")
+    void movesFocusIntoToolWindow() {
+        ListView<String> list = new ListView<>();
+        Button editor = new Button("Editor");
+        ToolWindow toolWindow = ToolWindow.builder("search", "Search", Icons.SEARCH, new VBox(new Label("Found"), list))
+                .build();
+        workbench.addToolWindow(toolWindow);
+        toolWindow.setVisible(false);
+        workbench.setContent(new StackPane(editor));
+        Stage stage = new Stage();
+        Scene scene = workbench.createScene(stage);
+        stage.show();
+        try {
+            editor.requestFocus();
+            toolWindow.getToggleAction().perform();
+            assertThat(toolWindow.isVisible()).isTrue();
+            assertThat(scene.getFocusOwner()).isSameAs(list);
+
+            toolWindow.getToggleAction().perform();
+            assertThat(toolWindow.isVisible()).isFalse();
+            assertThat(scene.getFocusOwner()).isSameAs(editor);
+
+            toolWindow.setVisible(true);
+            assertThat(scene.getFocusOwner()).isSameAs(editor);
+
+            list.requestFocus();
+            workbench.removeToolWindow(toolWindow);
+            assertThat(scene.getFocusOwner()).isSameAs(editor);
+        } finally {
+            stage.hide();
+        }
+    }
+
+    @Test
+    @DisplayName("Gives the focus back to the content on Escape in a tool window, which Shift+Escape hides as well")
+    void escapesToContent() {
+        ListView<String> list = new ListView<>();
+        Button editor = new Button("Editor");
+        ToolWindow toolWindow = ToolWindow.builder("search", "Search", Icons.SEARCH, list).build();
+        workbench.addToolWindow(toolWindow);
+        workbench.setContent(new StackPane(editor));
+        Stage stage = new Stage();
+        Scene scene = workbench.createScene(stage);
+        stage.show();
+        try {
+            list.requestFocus();
+            list.fireEvent(new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.ESCAPE, false, false, false, false));
+            assertThat(scene.getFocusOwner()).isSameAs(editor);
+            assertThat(toolWindow.isVisible()).isTrue();
+
+            list.requestFocus();
+            list.fireEvent(new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.ESCAPE, true, false, false, false));
+            assertThat(scene.getFocusOwner()).isSameAs(editor);
+            assertThat(toolWindow.isVisible()).isFalse();
+        } finally {
+            stage.hide();
+        }
+    }
+
+    @Test
+    @DisplayName("Leaves the escape key to a search field of a tool window clearing its text")
+    void leavesEscapeToSearchField() {
+        SearchField search = new SearchField();
+        search.setText("SO-1004");
+        Button editor = new Button("Editor");
+        workbench.addToolWindow(ToolWindow.builder("search", "Search", Icons.SEARCH, new VBox(search)).build());
+        workbench.setContent(new StackPane(editor));
+        Stage stage = new Stage();
+        Scene scene = workbench.createScene(stage);
+        stage.show();
+        try {
+            search.requestFocus();
+            search.fireEvent(new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.ESCAPE, false, false, false, false));
+            assertThat(search.getText()).isEmpty();
+            assertThat(scene.getFocusOwner()).isSameAs(search);
+
+            search.fireEvent(new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.ESCAPE, false, false, false, false));
+            assertThat(scene.getFocusOwner()).isSameAs(editor);
+        } finally {
+            stage.hide();
+        }
+    }
+
+    @Test
+    @DisplayName("Refuses a tool window docking in another workbench")
+    void refusesToolWindowOfAnotherWorkbench() {
+        ToolWindow toolWindow = ToolWindow.builder("orders", "Orders", Icons.RECORDS, new StackPane()).build();
+        new Workbench(false).addToolWindow(toolWindow);
+
+        assertThatIllegalArgumentException().isThrownBy(() -> workbench.addToolWindow(toolWindow));
     }
 
     @Test

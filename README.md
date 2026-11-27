@@ -144,6 +144,11 @@ stripe. Its title and actions can change once docked (`setTitle`, `getActions()`
 its header, button and menu items following. The workbench gives the tool window docked under an identifier
 (`getToolWindow("records")`), and undocks one (`removeToolWindow`), its island, button and shortcuts leaving the window.
 
+A tool window the user shows, through its button, menu item or shortcut, takes the focus, and gives it back to the
+content once hidden. The escape key in a tool window gives the focus back to the content, the tool window staying
+shown, and `Shift+Escape` hides it as well. Showing it from the code, such as when restoring the tool windows the user
+left showing, leaves the focus where it stands.
+
 The content can be headed by a `ContentHeader`, a tab naming what it shows beside the buttons of its actions, and the
 status bar can tell how a task of the application stands with a `TaskStatus`, which follows a `Task` of JavaFX by
 itself:

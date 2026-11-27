@@ -55,6 +55,7 @@ public final class ToolWindow {
     private final DoubleProperty height;
     private final Action toggleAction;
     private final Action hideAction;
+    private @Nullable Workbench workbench;
 
     private ToolWindow(Builder builder) {
         id = builder.id;
@@ -70,14 +71,14 @@ public final class ToolWindow {
                 .description(Bindings.createStringBinding(() -> Texts.format("toolWindow.toggle", getTitle()), title))
                 .icon(icon)
                 .selected(visible)
-                .handler(() -> setVisible(!isVisible()));
+                .handler(this::toggle);
         if (builder.accelerator != null) {
             toggle.accelerator(builder.accelerator);
         }
         toggleAction = toggle.build();
         hideAction = Action.builder(id + ".hide", Texts.get("toolWindow.hide"))
                 .icon(Icons.HIDE)
-                .handler(() -> setVisible(false))
+                .handler(this::hide)
                 .build();
     }
 
@@ -169,7 +170,8 @@ public final class ToolWindow {
 
     /**
      * Gives the action showing the tool window when hidden and hiding it when shown, which its stripe button and
-     * menu item perform.
+     * menu item perform. Docked, the tool window takes the focus once shown this way, and gives it back to the content
+     * of the window once hidden while holding it.
      *
      * @return the toggle action, selected while the tool window shows
      */
@@ -178,7 +180,8 @@ public final class ToolWindow {
     }
 
     /**
-     * Gives the action hiding the tool window, which the last button of its header performs.
+     * Gives the action hiding the tool window, which the last button of its header performs, the focus going back to
+     * the content of the window when the tool window held it.
      *
      * @return the action
      */
@@ -205,7 +208,8 @@ public final class ToolWindow {
     }
 
     /**
-     * Shows or hides the tool window.
+     * Shows or hides the tool window, leaving the focus where it stands: unlike its toggle action, which the user
+     * performs, such as when the application restores the tool windows the user left showing.
      *
      * @param visible {@code true} to show it
      */
@@ -265,6 +269,40 @@ public final class ToolWindow {
      */
     public void setHeight(double height) {
         this.height.set(height);
+    }
+
+    /**
+     * Gives the workbench the tool window docks in, which moves the focus when the user shows or hides it.
+     *
+     * @return the workbench, or {@code null} while undocked
+     */
+    @Nullable Workbench getWorkbench() {
+        return workbench;
+    }
+
+    /**
+     * Tells the tool window the workbench it docks in.
+     *
+     * @param workbench the workbench, or {@code null} once undocked
+     */
+    void setWorkbench(@Nullable Workbench workbench) {
+        this.workbench = workbench;
+    }
+
+    private void toggle() {
+        if (workbench == null) {
+            setVisible(!isVisible());
+        } else {
+            workbench.toggle(this);
+        }
+    }
+
+    private void hide() {
+        if (workbench == null) {
+            setVisible(false);
+        } else {
+            workbench.hide(this);
+        }
     }
 
     /**
