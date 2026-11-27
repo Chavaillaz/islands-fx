@@ -162,6 +162,19 @@ workbench.getStatusBar().getWidgets().add(loading);
 loading.follow(loadTask);
 ```
 
+The items an application opens side by side show in `ContentTabs`, a tab pane whose tabs look as those of an editor:
+a tab closes by its button, showing on the tab under the mouse and the one selected, or by a click of the middle
+button, and moves by dragging, the buttons of the actions applying to the content standing at the end of the row:
+
+```java
+ContentTabs tabs = new ContentTabs(new Tab("SO-10042", detailsOf(order)));
+tabs.getActions().setAll(edit, copy, delete);
+workbench.setContent(tabs);
+```
+
+`tabs.close(tab)` closes a tab as its button does, its close request handler able to keep it open, such as from an
+action closing the item selected.
+
 The workbench shows notifications in balloons over the bottom right corner of the window: they go away by
 themselves, or stay until closed for a warning or a danger, and offer links to their actions:
 

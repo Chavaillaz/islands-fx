@@ -28,6 +28,7 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Pagination;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
@@ -62,8 +63,10 @@ import com.chavaillaz.fx.islands.control.Tone;
 import com.chavaillaz.fx.islands.control.ToneRows;
 import com.chavaillaz.fx.islands.control.Validation;
 import com.chavaillaz.fx.islands.icon.Icons;
+import com.chavaillaz.fx.islands.workbench.ContentTabs;
 import com.chavaillaz.fx.islands.workbench.TaskStatus;
 import com.chavaillaz.fx.islands.workbench.ToolWindow;
+import com.chavaillaz.fx.islands.workbench.ToolWindowAnchor;
 import com.chavaillaz.fx.islands.workbench.Workbench;
 
 @ExtendWith(JavaFxExtension.class)
@@ -114,14 +117,17 @@ class BaseStylesheetTest {
         ListView<String> toolWindowContent = new ListView<>();
         TreeView<String> deeper = new TreeView<>();
         deeper.getStyleClass().add("edge-to-edge");
+        TreeTableView<String> tabContent = new TreeTableView<>();
         Workbench workbench = new Workbench();
         workbench.setContent(content);
         workbench.addToolWindow(ToolWindow.builder("list", "List", Icons.LIST, toolWindowContent).build());
         workbench.addToolWindow(ToolWindow.builder("tree", "Tree", Icons.FOLDER, new VBox(new TextField(), deeper))
                 .build());
+        workbench.addToolWindow(ToolWindow.builder("tabs", "Tabs", Icons.RECORD,
+                new ContentTabs(new Tab("Lines", tabContent))).anchor(ToolWindowAnchor.RIGHT).build());
         themed(ThemeMode.DARK, workbench.getNode());
 
-        assertThat(List.of(content, toolWindowContent, deeper))
+        assertThat(List.of(content, toolWindowContent, deeper, tabContent))
                 .allSatisfy(view -> assertThat(fills(view)).containsOnly(Color.TRANSPARENT));
     }
 
