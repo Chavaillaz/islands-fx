@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNullElse;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -75,7 +76,9 @@ public final class Workbench {
     private final ToolWindowStripe leftStripe = new ToolWindowStripe(ToolWindowAnchor.LEFT);
     private final ToolWindowStripe rightStripe = new ToolWindowStripe(ToolWindowAnchor.RIGHT);
     private final List<ToolWindow> toolWindows = new ArrayList<>();
+    private final Map<ToolWindow, Subscription> dockings = new HashMap<>();
     private final List<Action> actions = new ArrayList<>();
+    private final Map<Action, Runnable> performers = new HashMap<>();
     private final List<ActionSearch.Entry> menuEntries = new ArrayList<>();
     private final Map<KeyCombination, Runnable> shortcuts = new LinkedHashMap<>();
     private final Set<KeyCombination> systemMenuShortcuts = new HashSet<>();
@@ -178,14 +181,45 @@ public final class Workbench {
         if (toolWindows.stream().anyMatch(each -> each.getId().equals(toolWindow.getId()))) {
             throw new IllegalArgumentException("A tool window named " + toolWindow.getId() + " is already docked");
         }
-        if (toolWindow.getAnchor() == ToolWindowAnchor.BOTTOM) {
-            showAloneAtBottom(toolWindow);
-        }
+        Subscription docking = toolWindow.getAnchor() == ToolWindowAnchor.BOTTOM
+                ? showAloneAtBottom(toolWindow)
+                : Subscription.EMPTY;
         toolWindows.add(toolWindow);
+        dockings.put(toolWindow, docking);
         registerActions(toolWindow.getToggleAction());
         toolWindow.getActions().forEach(this::registerActions);
         islands.dock(toolWindow, createIsland(toolWindow));
-        (toolWindow.getAnchor() == ToolWindowAnchor.RIGHT ? rightStripe : leftStripe).add(toolWindow);
+        stripe(toolWindow).add(toolWindow);
+    }
+
+    /**
+     * Undocks a tool window: its island and its button leave the workbench, and the shortcuts of its actions stop
+     * working. The items the application put in its menus for it stay, the application removing them itself. The tool
+     * window can be docked again.
+     *
+     * @param toolWindow the tool window
+     * @return {@code true} when it was docked
+     */
+    public boolean removeToolWindow(ToolWindow toolWindow) {
+        if (!toolWindows.remove(toolWindow)) {
+            return false;
+        }
+        dockings.remove(toolWindow).unsubscribe();
+        unregisterActions(toolWindow.getToggleAction());
+        toolWindow.getActions().forEach(this::unregisterActions);
+        islands.undock(toolWindow);
+        stripe(toolWindow).remove(toolWindow);
+        return true;
+    }
+
+    /**
+     * Gives the tool window docked under an identifier.
+     *
+     * @param id the identifier of the tool window
+     * @return the tool window, or {@code null} when none of that identifier is docked
+     */
+    public @Nullable ToolWindow getToolWindow(String id) {
+        return toolWindows.stream().filter(each -> each.getId().equals(id)).findFirst().orElse(null);
     }
 
     /**
@@ -207,8 +241,27 @@ public final class Workbench {
     public void registerActions(Action... actions) {
         for (Action action : actions) {
             if (!this.actions.contains(action)) {
+                Runnable performer = action::perform;
                 this.actions.add(action);
-                addShortcut(action.getAccelerator(), action::perform);
+                performers.put(action, performer);
+                addShortcut(action.getAccelerator(), performer);
+            }
+        }
+    }
+
+    /**
+     * Forgets actions registered before, such as those of a view the application closed: their shortcuts stop
+     * working, and the search of the actions no longer finds them, unless they stand in the main menu.
+     *
+     * @param actions the actions
+     */
+    public void unregisterActions(Action... actions) {
+        for (Action action : actions) {
+            Runnable performer = performers.remove(action);
+            this.actions.remove(action);
+            KeyCombination accelerator = action.getAccelerator();
+            if (performer != null && accelerator != null && shortcuts.get(accelerator) == performer) {
+                removeShortcut(accelerator);
             }
         }
     }
@@ -290,16 +343,22 @@ public final class Workbench {
     /**
      * Makes a tool window docked at the bottom the only one showing there: hidden when docked while another one shows,
      * and hiding the others once shown.
+     *
+     * @return the subscription, which stops hiding the others once unsubscribed
      */
-    private void showAloneAtBottom(ToolWindow toolWindow) {
+    private Subscription showAloneAtBottom(ToolWindow toolWindow) {
         if (toolWindow.isVisible() && bottomToolWindows().anyMatch(ToolWindow::isVisible)) {
             toolWindow.setVisible(false);
         }
-        toolWindow.visibleProperty().subscribe(shown -> {
+        return toolWindow.visibleProperty().subscribe(shown -> {
             if (shown) {
                 bottomToolWindows().filter(other -> other != toolWindow).forEach(other -> other.setVisible(false));
             }
         });
+    }
+
+    private ToolWindowStripe stripe(ToolWindow toolWindow) {
+        return toolWindow.getAnchor() == ToolWindowAnchor.RIGHT ? rightStripe : leftStripe;
     }
 
     private Stream<ToolWindow> bottomToolWindows() {

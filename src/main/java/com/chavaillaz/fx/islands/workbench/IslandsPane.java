@@ -6,6 +6,7 @@ import java.util.List;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.layout.Region;
+import javafx.util.Subscription;
 
 /**
  * Lays out the islands of the workbench: the tool windows docked on the left, the content, then the tool windows docked
@@ -45,14 +46,34 @@ final class IslandsPane extends Region {
      */
     void dock(ToolWindow toolWindow, Node island) {
         Divider divider = new Divider(toolWindow, island);
-        docked.add(new Docked(toolWindow, island, divider));
+        Subscription sizes = toolWindow.widthProperty().subscribe(this::requestLayout)
+                .and(toolWindow.heightProperty().subscribe(this::requestLayout));
+        docked.add(new Docked(toolWindow, island, divider, sizes));
         getChildren().addAll(island, divider);
         for (Node node : List.of(island, divider)) {
             node.visibleProperty().bind(toolWindow.visibleProperty());
             node.managedProperty().bind(toolWindow.visibleProperty());
         }
-        toolWindow.widthProperty().addListener(observable -> requestLayout());
-        toolWindow.heightProperty().addListener(observable -> requestLayout());
+    }
+
+    /**
+     * Undocks a tool window, its island and the gap beside it leaving the pane.
+     *
+     * @param toolWindow the tool window, docked or not
+     */
+    void undock(ToolWindow toolWindow) {
+        docked.removeIf(each -> {
+            if (each.toolWindow() != toolWindow) {
+                return false;
+            }
+            each.sizes().unsubscribe();
+            for (Node node : List.of(each.island(), each.divider())) {
+                node.visibleProperty().unbind();
+                node.managedProperty().unbind();
+            }
+            getChildren().removeAll(each.island(), each.divider());
+            return true;
+        });
     }
 
     @Override
@@ -161,7 +182,7 @@ final class IslandsPane extends Region {
         return Math.max(ToolWindow.MIN_HEIGHT, room);
     }
 
-    private record Docked(ToolWindow toolWindow, Node island, Divider divider) {
+    private record Docked(ToolWindow toolWindow, Node island, Divider divider, Subscription sizes) {
     }
 
     /**

@@ -84,6 +84,59 @@ class WorkbenchTest {
     }
 
     @Test
+    @DisplayName("Looks up a tool window by its identifier")
+    void looksUpToolWindow() {
+        ToolWindow orders = ToolWindow.builder("orders", "Orders", Icons.RECORDS, new StackPane()).build();
+        workbench.addToolWindow(orders);
+
+        assertThat(workbench.getToolWindow("orders")).isSameAs(orders);
+        assertThat(workbench.getToolWindow("customers")).isNull();
+    }
+
+    @Test
+    @DisplayName("Removes a tool window, its island, button, shortcuts and actions leaving the workbench")
+    void removesToolWindow() {
+        KeyCombination toggle = KeyCombination.keyCombination("Shortcut+1");
+        KeyCombination refreshKey = KeyCombination.keyCombination("Shortcut+R");
+        Action refresh = Action.builder("orders.refresh", "Refresh").icon(Icons.REFRESH).accelerator(refreshKey)
+                .handler(() -> { }).build();
+        StackPane content = new StackPane();
+        ToolWindow orders = ToolWindow.builder("orders", "Orders", Icons.RECORDS, content)
+                .anchor(ToolWindowAnchor.BOTTOM).accelerator(toggle).actions(refresh).build();
+        workbench.addToolWindow(orders);
+        Scene scene = workbench.createScene(new Stage());
+
+        assertThat(workbench.removeToolWindow(orders)).isTrue();
+        assertThat(workbench.getToolWindows()).isEmpty();
+        assertThat(workbench.getToolWindow("orders")).isNull();
+        assertThat(content.getScene()).isNull();
+        assertThat(root.getLeft().isVisible()).isFalse();
+        assertThat(scene.getAccelerators()).doesNotContainKeys(toggle, refreshKey);
+        assertThat(workbench.searchEntries()).extracting(ActionSearch.Entry::action)
+                .doesNotContain(orders.getToggleAction(), refresh);
+        assertThat(workbench.removeToolWindow(orders)).isFalse();
+
+        workbench.addToolWindow(orders);
+        assertThat(workbench.getToolWindows()).containsExactly(orders);
+        assertThat(content.getScene()).isSameAs(scene);
+        assertThat(scene.getAccelerators()).containsKeys(toggle, refreshKey);
+    }
+
+    @Test
+    @DisplayName("Forgets the actions unregistered, their shortcuts stopping and the search no longer finding them")
+    void unregistersActions() {
+        KeyCombination accelerator = KeyCombination.keyCombination("Shortcut+S");
+        Action save = Action.builder("test.save", "Save").accelerator(accelerator).handler(() -> { }).build();
+        Scene scene = workbench.createScene(new Stage());
+        workbench.registerActions(save);
+        assertThat(scene.getAccelerators()).containsKey(accelerator);
+
+        workbench.unregisterActions(save);
+        assertThat(scene.getAccelerators()).doesNotContainKey(accelerator);
+        assertThat(workbench.searchEntries()).extracting(ActionSearch.Entry::action).doesNotContain(save);
+    }
+
+    @Test
     @DisplayName("Docks a tool window on the right, its button on the stripe of the right")
     void docksToolWindowOnRight() {
         workbench.addToolWindow(ToolWindow.builder("structure", "Structure", Icons.OBJECT, new StackPane())

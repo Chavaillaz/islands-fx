@@ -1,7 +1,9 @@
 package com.chavaillaz.fx.islands.workbench;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import javafx.beans.binding.Bindings;
@@ -29,6 +31,7 @@ final class ToolWindowStripe extends VBox {
 
     private final VBox top = new VBox();
     private final VBox bottom = new VBox();
+    private final Map<ToolWindow, ButtonBase> buttons = new HashMap<>();
 
     ToolWindowStripe(ToolWindowAnchor anchor) {
         getStyleClass().addAll("stripe", "stripe-" + anchor.name().toLowerCase(Locale.ROOT));
@@ -51,7 +54,19 @@ final class ToolWindowStripe extends VBox {
     void add(ToolWindow toolWindow) {
         ButtonBase button = ActionButtons.create(toolWindow.getToggleAction(), ICON_SIZE);
         button.getStyleClass().add("stripe-button");
+        buttons.put(toolWindow, button);
         (toolWindow.getAnchor() == ToolWindowAnchor.BOTTOM ? bottom : top).getChildren().add(button);
+    }
+
+    /**
+     * Removes the button of a tool window, the stripe hiding once it holds no button any more.
+     *
+     * @param toolWindow the tool window
+     */
+    void remove(ToolWindow toolWindow) {
+        ButtonBase button = buttons.remove(toolWindow);
+        top.getChildren().remove(button);
+        bottom.getChildren().remove(button);
     }
 
     /**

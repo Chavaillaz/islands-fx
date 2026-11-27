@@ -140,7 +140,8 @@ An application keeping it in the main toolbar on macOS as well creates its workb
 
 A tool window docks on the left, unless told otherwise: on the right, or under the content, where one shows at a time,
 such as a log or the output of a task (`.anchor(ToolWindowAnchor.BOTTOM)`), its button at the bottom of the left
-stripe.
+stripe. The workbench gives the tool window docked under an identifier (`getToolWindow("records")`), and undocks one
+(`removeToolWindow`), its island, button and shortcuts leaving the window.
 
 The content can be headed by a `ContentHeader`, a tab naming what it shows beside the buttons of its actions, and the
 status bar can tell how a task of the application stands with a `TaskStatus`, which follows a `Task` of JavaFX by
@@ -197,6 +198,8 @@ toolbars:
 ```java
 workbench.registerActions(refresh, save);
 ```
+
+The actions of a view the application closes are forgotten with `unregisterActions`, their shortcuts then stopping.
 
 `Shortcut+Shift+A` opens the search of these actions over the window: the words typed list the actions whose text,
 menu or description holds them, the best matches first, and the enter key performs the one selected. The action
