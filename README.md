@@ -343,7 +343,8 @@ A change is ready once that passes, which takes:
 
 - **Tests covering it.** They assert with [AssertJ](https://assertj.github.io/doc/), and each is named by a
   sentence saying what the library does (its `@DisplayName`). The controls are tested on the headless platform of
-  JavaFX, which needs no display. A test still running after a minute fails.
+  JavaFX, which needs no display. A test still running after a minute fails, and so does a test styling controls
+  once JavaFX records a CSS error, such as a color no theme defines.
 - **Imports in order**, which Checkstyle verifies (see [checkstyle.xml](checkstyle.xml)): the static ones,
   then those of `java`, `javax` and `jakarta`, then those of third parties, then those of `com.chavaillaz`,
   each group sorted alphabetically and separated from the next by a blank line, with no star import and none

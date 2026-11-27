@@ -13,6 +13,7 @@ import javafx.application.ColorScheme;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
+import javafx.css.CssParser;
 import javafx.css.PseudoClass;
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
@@ -45,6 +46,8 @@ import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -68,6 +71,19 @@ import com.chavaillaz.fx.islands.workbench.Workbench;
 class BaseStylesheetTest {
 
     private final SimpleObjectProperty<ColorScheme> system = new SimpleObjectProperty<>(ColorScheme.LIGHT);
+
+    @BeforeEach
+    void forgetCssErrors() {
+        CssParser.errorsProperty().clear();
+    }
+
+    /**
+     * Fails on a CSS error JavaFX recorded while styling, such as a color no theme defines, which shows nowhere else.
+     */
+    @AfterEach
+    void failOnCssErrors() {
+        assertThat(CssParser.errorsProperty()).extracting(Object::toString).isEmpty();
+    }
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(value = ThemeMode.class, names = {"LIGHT", "DARK"})

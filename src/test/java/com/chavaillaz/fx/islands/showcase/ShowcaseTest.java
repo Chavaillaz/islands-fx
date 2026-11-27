@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 
 import javafx.application.ColorScheme;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.css.CssParser;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -20,6 +21,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.WritableImage;
 import javafx.scene.transform.Transform;
 import javafx.stage.Stage;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -34,7 +37,7 @@ import com.chavaillaz.fx.islands.workbench.Workbenches;
 /**
  * Renders the showcase in the light theme and the dark one, its main window with the main menu in its toolbar. Given
  * a folder ({@code -Dshowcase.screenshots=docs/screenshots}), the renders are written there as the screenshots of the
- * README, at twice their size for the screens of high density.
+ * README, at twice their size for the screens of high density. A render fails on any CSS error JavaFX records.
  */
 @ExtendWith(JavaFxExtension.class)
 @DisplayName("Showcase")
@@ -42,6 +45,19 @@ class ShowcaseTest {
 
     private static final String SCREENSHOTS = System.getProperty("showcase.screenshots", "");
     private static final double SCALE = SCREENSHOTS.isEmpty() ? 1 : 2;
+
+    @BeforeEach
+    void forgetCssErrors() {
+        CssParser.errorsProperty().clear();
+    }
+
+    /**
+     * Fails on a CSS error JavaFX recorded while styling, such as a color no theme defines, which shows nowhere else.
+     */
+    @AfterEach
+    void failOnCssErrors() {
+        assertThat(CssParser.errorsProperty()).extracting(Object::toString).isEmpty();
+    }
 
     private static ThemeManager themes(ThemeMode mode) {
         return new ThemeManager(mode, new SimpleObjectProperty<>(ColorScheme.LIGHT));
