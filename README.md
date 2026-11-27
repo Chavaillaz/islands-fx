@@ -316,8 +316,8 @@ themes.accentProperty().bind(Platform.getPreferences().accentColorProperty());
 ### Style classes
 
 Lists, trees, tables and tree tables are framed as text fields are, unless they fill an island, which frames them
-already: the content of the window, or of a tool window. A few style classes, which the nodes of an application take,
-change how the themes style them:
+already: the content of the window, a tool window, or a tab of `ContentTabs`. A few style classes, which the nodes of
+an application take, change how the themes style them:
 
 | Style class                                  | Given to                  | Makes it                                  |
 |----------------------------------------------|---------------------------|-------------------------------------------|
