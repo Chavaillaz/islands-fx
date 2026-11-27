@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 import java.util.List;
+import java.util.Locale;
 
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.css.PseudoClass;
@@ -195,6 +196,18 @@ class WorkbenchTest {
                 });
         assertThat(systemWorkbench.getMainToolbar().getLeftItems()).isEmpty();
         assertThat(systemWorkbench.hasSystemMenuBar()).isTrue();
+    }
+
+    @Test
+    @DisplayName("Keeps its main menu in the main toolbar when told, whatever the operating system")
+    void placesMainMenuInToolbar() {
+        Workbench toolbarWorkbench = new Workbench(MainMenuPlacement.MAIN_TOOLBAR);
+        toolbarWorkbench.setMainMenu(List.of(new Menu("File")));
+
+        assertThat(toolbarWorkbench.hasSystemMenuBar()).isFalse();
+        assertThat(toolbarWorkbench.getMainToolbar().getLeftItems()).singleElement().isInstanceOf(ButtonBase.class);
+        assertThat(new Workbench(MainMenuPlacement.SYSTEM).hasSystemMenuBar())
+                .isEqualTo(System.getProperty("os.name").toLowerCase(Locale.ROOT).startsWith("mac"));
     }
 
     @Test

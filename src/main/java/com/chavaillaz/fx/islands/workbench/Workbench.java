@@ -1,5 +1,6 @@
 package com.chavaillaz.fx.islands.workbench;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
 
 import java.util.ArrayList;
@@ -48,7 +49,7 @@ import com.chavaillaz.fx.islands.internal.Texts;
  * <p>
  * The workbench is the scene of its window ({@link #createScene(Stage)}), its main toolbar standing in the title bar.
  * Its main menu stands in the menu bar of macOS, and elsewhere in a menu opened by the first button of the main
- * toolbar.
+ * toolbar, unless the application keeps it there on macOS as well ({@link MainMenuPlacement#MAIN_TOOLBAR}).
  * <p>
  * The workbench knows the actions it shows, those of its tool windows and of its main menu, and those the application
  * {@link #registerActions(Action...) registers}: their shortcuts work wherever the focus stands in the window, and the
@@ -91,7 +92,17 @@ public final class Workbench {
      * on macOS only.
      */
     public Workbench() {
-        this(System.getProperty("os.name", "").toLowerCase(Locale.ROOT).startsWith("mac"));
+        this(MainMenuPlacement.SYSTEM);
+    }
+
+    /**
+     * Creates a workbench without content nor tool window yet, its main menu standing where told.
+     *
+     * @param placement where the main menu stands, such as in the main toolbar on every operating system
+     */
+    public Workbench(MainMenuPlacement placement) {
+        this(requireNonNull(placement, "placement") == MainMenuPlacement.SYSTEM
+                && System.getProperty("os.name", "").toLowerCase(Locale.ROOT).startsWith("mac"));
     }
 
     /**
@@ -228,16 +239,17 @@ public final class Workbench {
      * Tells whether the main menu stands in the menu bar of the system, whose menu of the application then holds the
      * item quitting it, rather than the main toolbar.
      *
-     * @return {@code true} on macOS
+     * @return {@code true} on macOS, unless the main menu was placed in the main toolbar
      */
     public boolean hasSystemMenuBar() {
         return systemMenuBar;
     }
 
     /**
-     * Gives the window its main menu, once: in the menu bar of the system on macOS, elsewhere in a menu opened by a
-     * button heading the main toolbar, whose shortcuts are then given to the scene, so that they work while the menu
-     * is closed. The search of the actions finds the items of the menus, under the path of their menus.
+     * Gives the window its main menu, once: in the menu bar of the system where it {@link #hasSystemMenuBar() stands
+     * there}, otherwise in a menu opened by a button heading the main toolbar, whose shortcuts are then given to the
+     * scene, so that they work while the menu is closed. The search of the actions finds the items of the menus, under
+     * the path of their menus.
      *
      * @param menus the menus, in the order of the menu bar
      */

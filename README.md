@@ -134,6 +134,10 @@ public void start(Stage stage) {
 the stage shows. The `ThemeManager` applies the theme to the windows opened afterwards, dialogs included, and
 `themes.apply(scene)` applies it to the main window before it shows, so that it never shows unthemed.
 
+The main menu stands in the menu bar of macOS, and elsewhere in a menu opened by the first button of the main toolbar.
+An application keeping it in the main toolbar on macOS as well creates its workbench with
+`new Workbench(MainMenuPlacement.MAIN_TOOLBAR)`.
+
 A tool window docks on the left, unless told otherwise: on the right, or under the content, where one shows at a time,
 such as a log or the output of a task (`.anchor(ToolWindowAnchor.BOTTOM)`), its button at the bottom of the left
 stripe.

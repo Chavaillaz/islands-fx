@@ -32,7 +32,8 @@ import com.chavaillaz.fx.islands.JavaFxExtension;
 import com.chavaillaz.fx.islands.control.Tone;
 import com.chavaillaz.fx.islands.theme.ThemeManager;
 import com.chavaillaz.fx.islands.theme.ThemeMode;
-import com.chavaillaz.fx.islands.workbench.Workbenches;
+import com.chavaillaz.fx.islands.workbench.MainMenuPlacement;
+import com.chavaillaz.fx.islands.workbench.Workbench;
 
 /**
  * Renders the showcase in the light theme and the dark one, its main window with the main menu in its toolbar. Given
@@ -103,7 +104,7 @@ class ShowcaseTest {
     @EnumSource(value = ThemeMode.class, names = {"LIGHT", "DARK"})
     @DisplayName("Shows the main window of an application, notifying a failure or searching its actions")
     void showsMainWindow(ThemeMode mode) throws IOException {
-        Showcase showcase = new Showcase(Workbenches.withMenuInToolbar(), themes(mode));
+        Showcase showcase = new Showcase(new Workbench(MainMenuPlacement.MAIN_TOOLBAR), themes(mode));
         Stage stage = new Stage();
         stage.setWidth(Showcase.WIDTH);
         stage.setHeight(Showcase.HEIGHT);
